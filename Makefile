@@ -23,7 +23,7 @@ SRCS=$(wildcard src/**/*.c) $(wildcard src/*.c) $(wildcard *.c) # Changed to .c
 OBJS=$(SRCS:src/%.c=obj/%.o) # Changed to .c
 
 # provide a list or arguments to the executable
-EXE_ARGS=3
+EXE_ARGS=4
 
 # targets
 # set default target : https://stackoverflow.com/questions/2057689/how-does-make-app-know-default-target-to-build-if-no-target-is-specified
@@ -72,3 +72,7 @@ dirs:
 
 clear: # alias of clean
 	@$(MAKE) -f $(THIS_FILE) clean
+
+# special rule for running python
+py:
+	python3 python/main.py
