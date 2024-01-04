@@ -1,0 +1,9 @@
+{
+    "ltex.language": "fr",
+    "ltex.additionalRules.motherTongue": "fr",
+    "ltex.checkFrequency": "save",
+    "files.associations": {
+        "time.h": "c",
+        "math.h": "c"
+    }
+}
