@@ -63,3 +63,9 @@ On peut alors fournir cette matrice à `permut` en modifiant ses paramètres. On
 ```
 
 Ce code permet de calculer et d'afficher la valeur du chemin.
+
+### Q3: Recherche du plus court circuit hamiltonien
+
+*Comparez ces temps d’exécution à ceux du programme utilisant un principe de programmation dynamique.*
+
+TODO: Répondre

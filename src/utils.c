@@ -31,3 +31,20 @@ int getInputNumberOfVertices(int argc, char *argv[]) {
     }
     return n;
 }
+
+/**
+ * @brief Returns true if the "generate python(-g)" option is given,
+ * or false otherwise.
+ * 
+ * @param argc Number of arguments
+ * @param argv Array of arguments
+*/
+bool getGeneratePythonFlag(int argc, char *argv[]) {
+    bool generatePython = false;
+    if (argc > 2) {
+        if (strcmp(argv[2], "-g") == 0) {
+            generatePython = true;
+        }
+    }
+    return generatePython;
+}

@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -11,6 +12,9 @@ int iseed = 1;     // Seed used to initialize the random number generator
 int** cost;        // cost[i][j] = cost[j][i] = cost of edge {i,j}
 long int nbCalls = 0; // Number of calls to the recursive permut function
 FILE* fd;          // File descriptor of the Python script
+int bestCost = INT_MAX; // Best cost found so far
+
+bool generatePython = false;
 
 int nextRand(int n) {
     // Postcondition: return an integer value in [0,n-1], according to a pseudo-random sequence which is initialized with iseed
@@ -27,27 +31,30 @@ int** createCost(int n) {
     int max = 20000;
     int** cost = (int**) malloc(n*sizeof(int*));
 
-    fprintf(fd, "import turtle\n\n");
-    fprintf(fd, "from utils import mark_point\n\n");
-    fprintf(fd, "def draw_path_permutations(turtle_speed):\n");
-    fprintf(fd, "    # Configuration initiale\n");
-    fprintf(fd, "    turtle.setworldcoordinates(0, 0, %d, %d)\n", max, max+100);
+    // init python script
+    if (generatePython) {
+        fprintf(fd, "import turtle\n\n");
+        fprintf(fd, "from utils import mark_point\n\n");
+        fprintf(fd, "def draw_path_permutations(turtle_speed):\n");
+        fprintf(fd, "    # Configuration initiale\n");
+        fprintf(fd, "    turtle.setworldcoordinates(0, 0, %d, %d)\n", max, max+100);
     
-    // Generate n random points in python turtle space
-    for (int i=0; i<n; i++) {
-        x[i] = nextRand(max);
-        y[i] = nextRand(max);
-        fprintf(fd, "    p%d=(%d,%d)\n", i, x[i], y[i]);
-        cost[i] = (int*)malloc(n*sizeof(int));
+        // Generate n random points in python turtle space
+        for (int i=0; i<n; i++) {
+            x[i] = nextRand(max);
+            y[i] = nextRand(max);
+            fprintf(fd, "    p%d=(%d,%d)\n", i, x[i], y[i]);
+            cost[i] = (int*)malloc(n*sizeof(int));
+        }
+        fprintf(fd, "\n\n");
+        fprintf(fd, "    # Affichage des points\n");
+        fprintf(fd, "    def mark_all_points():\n");
+        for (int i=0; i<n; i++) fprintf(fd, "        mark_point(p%d)\n", i);
+        fprintf(fd, "\n");
+        fprintf(fd, "    turtle.speed(turtle_speed)\n");
+        fprintf(fd, "    mark_all_points()\n\n");
+        fprintf(fd, "    wait = input(\"Enter return to start\")\n\n");
     }
-    fprintf(fd, "\n\n");
-    fprintf(fd, "    # Affichage des points\n");
-    fprintf(fd, "    def mark_all_points():\n");
-    for (int i=0; i<n; i++) fprintf(fd, "        mark_point(p%d)\n", i);
-    fprintf(fd, "\n");
-    fprintf(fd, "    turtle.speed(turtle_speed)\n");
-    fprintf(fd, "    mark_all_points()\n\n");
-    fprintf(fd, "    wait = input(\"Enter return to start\")\n\n");
 
     // create cost matrix
     for (int i=0; i<n; i++) {
@@ -68,7 +75,7 @@ int** createCost(int n) {
  * @param n Number of vertices
  * 
 */
-void genTurtleTour(int visited[], int n) {
+void genPythonTurtleTour(int visited[], int n) {
     // input: n = number n of vertices; sol[0..n-1] = permutation of [0,n-1]; fd = file descriptor
     // side effect: print in fd the Python script for displaying the tour associated with sol
     fprintf(fd, "    # path permutation\n");
@@ -99,7 +106,8 @@ void permut(
     nbCalls++;
     // INSERT YOUR CODE HERE!
     if (nbNotVisited == 0) {
-        genTurtleTour(visited, nbVisited);
+        if (generatePython)
+            genPythonTurtleTour(visited, nbVisited);
 
         // log permutation in terminal
         printf("[");
@@ -115,6 +123,11 @@ void permut(
         }
         totalCost += cost[visited[nbVisited-1]][visited[0]];
         printf(" cost: %d\n", totalCost);
+
+        // update best cost
+        if (totalCost < bestCost) {
+            bestCost = totalCost;
+        }
     }
     for (int i = 0; i < nbNotVisited; i++) {
         // add notVisited[i] to visited
@@ -142,8 +155,10 @@ void permut(
 
 int main(int argc, char *argv[]) {
     int n = getInputNumberOfVertices(argc, argv);
+    generatePython = getGeneratePythonFlag(argc, argv);
 
-    fd  = fopen("python/generated.py", "w");
+    if (generatePython)
+        fd  = fopen("python/generated.py", "w");
     int** costMatrix = createCost(n);
 
     // initializations
@@ -155,10 +170,12 @@ int main(int argc, char *argv[]) {
         notVisited[i] = i+1;
     
     permut(visited, 1, notVisited, n-1, costMatrix);
+    printf("best cost: %d\n", bestCost);
     printf("n=%d nbCalls=%ld time=%.3fs\n", n, nbCalls, ((double) (clock() - t)) / CLOCKS_PER_SEC);
     
     // clean up
-    fclose(fd);
+    if (generatePython)
+        fclose(fd);
     for (int i = 0; i < n; i++) free(costMatrix[i]);
 
     return 0;
