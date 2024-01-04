@@ -20,12 +20,12 @@ int nextRand(int n) {
     return iseed % n;
 }
 
-void createCost(int n) {
+int** createCost(int n) {
     // input: the number n of vertices
     // return a symmetrical cost matrix such that, for each i,j in [0,n-1], cost[i][j] = cost of arc (i,j)
     int x[n], y[n];
     int max = 20000;
-    cost = (int**) malloc(n*sizeof(int*));
+    int** cost = (int**) malloc(n*sizeof(int*));
 
     fprintf(fd, "import turtle\n\n");
     fprintf(fd, "from utils import mark_point\n\n");
@@ -57,6 +57,8 @@ void createCost(int n) {
             cost[j][i] = cost[i][j];
         }
     }
+
+    return cost;
 }
 
 /**
@@ -81,7 +83,11 @@ void genTurtleTour(int visited[], int n) {
     fprintf(fd, "    wait = input(\"Enter return to continue\")\n\n");
 }
 
-void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
+void permut(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
     /*
      Input:
      - visited[0..nbVisited-1] = visited vertices
@@ -95,11 +101,20 @@ void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
     if (nbNotVisited == 0) {
         genTurtleTour(visited, nbVisited);
 
-        // log in terminal
+        // log permutation in terminal
+        printf("[");
         for (int i = 0; i < nbVisited; i++) {
-            printf("%d ", visited[i]);
+            printf("%d, ", visited[i]);
         }
-        printf("0\n");
+        printf("0]");
+
+        // compute and display cost
+        int totalCost = 0;
+        for (int i = 0; i < nbVisited-1; i++) {
+            totalCost += cost[visited[i]][visited[i+1]];
+        }
+        totalCost += cost[visited[nbVisited-1]][visited[0]];
+        printf(" cost: %d\n", totalCost);
     }
     for (int i = 0; i < nbNotVisited; i++) {
         // add notVisited[i] to visited
@@ -113,7 +128,11 @@ void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
         notVisited[nbNotVisited-1] = tmp;
 
         // recursive call
-        permut(visited, nbVisited+1, notVisited, nbNotVisited-1);
+        permut(
+            visited, nbVisited+1, 
+            notVisited, nbNotVisited-1,
+            cost    
+        );
         
         // backtrack
         notVisited[nbNotVisited-1] = notVisited[i];
@@ -125,7 +144,7 @@ int main(int argc, char *argv[]) {
     int n = getInputNumberOfVertices(argc, argv);
 
     fd  = fopen("python/generated.py", "w");
-    createCost(n);
+    int** costMatrix = createCost(n);
 
     // initializations
     clock_t t = clock();
@@ -135,8 +154,12 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < (n-1); i++)
         notVisited[i] = i+1;
     
-    permut(visited, 1, notVisited, n-1);
+    permut(visited, 1, notVisited, n-1, costMatrix);
     printf("n=%d nbCalls=%ld time=%.3fs\n", n, nbCalls, ((double) (clock() - t)) / CLOCKS_PER_SEC);
     
+    // clean up
+    fclose(fd);
+    for (int i = 0; i < n; i++) free(costMatrix[i]);
+
     return 0;
 }

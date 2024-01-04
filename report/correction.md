@@ -1,6 +1,5 @@
 # Notes de corrections
 
-
 ### Q1: compléter `permut`
 
 Solution possible:
@@ -39,10 +38,28 @@ void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
 
         // recursive call
         permut(visited, nbVisited+1, notVisited, nbNotVisited-1);
-    
+  
         // backtrack
         notVisited[nbNotVisited-1] = notVisited[i];
         notVisited[i] = tmp;
     }
 }
 ```
+
+### Q2: calcul de longueur des circuits hamiltoniens
+
+Dans cette étape, on modifie `createCost` pour qu'elle renvoie un `int**`, la matrice des coûts.
+
+On peut alors fournir cette matrice à `permut` en modifiant ses paramètres. On ajoute alors dans la scope du `if` le code suivant:
+
+```c
+// compute and display cost
+        int totalCost = 0;
+        for (int i = 0; i < nbVisited-1; i++) {
+            totalCost += cost[visited[i]][visited[i+1]];
+        }
+        totalCost += cost[visited[nbVisited-1]][visited[0]];
+        printf(" cost: %d\n", totalCost);
+```
+
+Ce code permet de calculer et d'afficher la valeur du chemin.
