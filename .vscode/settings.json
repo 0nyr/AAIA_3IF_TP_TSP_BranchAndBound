@@ -4,6 +4,8 @@
     "ltex.checkFrequency": "save",
     "files.associations": {
         "time.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "main.h": "c",
+        "array": "c"
     }
 }

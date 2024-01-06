@@ -7,9 +7,8 @@
 #include <string.h> // For strcmp()
 
 int getInputNumberOfVertices(int argc, char *argv[]);
-
 bool getGeneratePythonFlag(int argc, char *argv[]);
-
 bool getVerboseFlag(int argc, char *argv[]);
+void printArray(int array[], int n);
 
 #endif // UTILS_H

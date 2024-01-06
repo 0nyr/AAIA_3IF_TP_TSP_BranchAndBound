@@ -66,3 +66,14 @@ bool getVerboseFlag(int argc, char *argv[]) {
     }
     return verbose;
 }
+
+/**
+ * @brief Print an array of integers in the console.
+*/
+void printArray(int array[], int n) {
+    printf("[");
+    for (int i = 0; i < n - 1; i++) {
+        printf("%d, ", array[i]);
+    }
+    printf("%d]", array[n - 1]);
+}

@@ -7,6 +7,8 @@
 #include <string.h>
 
 #include "utils.h"
+#include "quicksort.h"
+#include "main.h" // WARN: Needed for functions used before they are defined like permut()
 
 int iseed = 1;     // Seed used to initialize the random number generator
 int** cost;        // cost[i][j] = cost[j][i] = cost of edge {i,j}
@@ -250,44 +252,22 @@ int bound(
     return sum;
 }
 
-void permut(
+/**
+ * @brief Loop inside the recursive function that computes all 
+ * the permutations of the vertices of the graph.
+ * 
+ * @param visited Array of visited vertices
+ * @param nbVisited Number of visited vertices
+ * @param costVisited Cost of the visited vertices
+ * @param notVisited Array of unvisited vertices
+ * @param nbNotVisited Number of unvisited vertices
+ * @param cost Cost matrix
+*/
+void permutLoop(
     int visited[], int nbVisited, int costVisited,
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
-    /*
-     Input:
-     - visited[0..nbVisited-1] = visited vertices
-     - notVisited[0..nbNotVisited-1] = unvisited vertices
-     Precondition:
-     - nbVisited > 0 and visited[0] = 0 (the tour always starts with vertex 0)
-     Postcondition: print all tours starting with visited[0..nbVisited-1] and ending with vertices of notVisited[0..nbNotVisited-1] (in any order), followed by 0
-     */
-    nbCalls++;
-    // INSERT YOUR CODE HERE!
-    if (nbNotVisited == 0) {
-        if (generatePython)
-            genPythonTurtleTour(visited, nbVisited);
-
-        // compute cost, don't forget to add the cost of the last edge
-        costVisited += cost[visited[nbVisited-1]][0];
-
-        if (verbose) {
-            // log permutation in terminal
-            printf("[");
-            for (int i = 0; i < nbVisited; i++) {
-                printf("%d, ", visited[i]);
-            }
-            printf("0]");
-            printf(" cost: %d\n", costVisited);
-        }
-
-        // update best cost
-        if (costVisited < bestCost) {
-            bestCost = costVisited;
-        }
-    }
-
     for (int i = 0; i < nbNotVisited; i++) {
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
@@ -326,15 +306,101 @@ void permut(
     }
 }
 
-void printCostMatrix(int** cost, int n) {
-    printf("cost matrix:\n");
-    for (int i=0; i<n; i++) {
-        printf("[");
-        for (int j=0; j<n-1; j++) {
-            printf("%d, ", cost[i][j]);
+void permut(
+    int visited[], int nbVisited, int costVisited,
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    /*
+     Input:
+     - visited[0..nbVisited-1] = visited vertices
+     - notVisited[0..nbNotVisited-1] = unvisited vertices
+     Precondition:
+     - nbVisited > 0 and visited[0] = 0 (the tour always starts with vertex 0)
+     Postcondition: print all tours starting with visited[0..nbVisited-1] and ending with vertices of notVisited[0..nbNotVisited-1] (in any order), followed by 0
+     */
+    nbCalls++;
+    // INSERT YOUR CODE HERE!
+    if (nbNotVisited == 0) {
+        if (generatePython)
+            genPythonTurtleTour(visited, nbVisited);
+
+        // compute cost, don't forget to add the cost of the last edge
+        costVisited += cost[visited[nbVisited-1]][0];
+
+        if (verbose) {
+            // log permutation in terminal
+            printf("[");
+            for (int i = 0; i < nbVisited; i++) {
+                printf("%d, ", visited[i]);
+            }
+            printf("0]");
+            printf(" cost: %d\n", costVisited);
         }
-        printf("%d]\n", cost[i][n-1]);
+
+        // update best cost
+        if (costVisited < bestCost) {
+            bestCost = costVisited;
+        }
     }
+
+    // reordering notVisited array
+    // reordering notVisitedIncrOrder array
+    // wrt cost of edge from last visited vertex
+
+    // make copies of arrays before sorting in place
+    int* costsFromLastVisited = (int*) malloc(nbNotVisited*sizeof(int));
+    for (int i = 0; i < nbNotVisited; i++) {
+        costsFromLastVisited[i] = cost[visited[nbVisited-1]][notVisited[i]];
+    }
+    int* notVisitedIncrOrder = (int*) malloc(nbNotVisited*sizeof(int));
+    for (int i = 0; i < nbNotVisited; i++) {
+        notVisitedIncrOrder[i] = notVisited[i];
+    }
+
+    //int* costsFromLastVisited = cost[visited[nbVisited-1]];
+
+    quicksortInPlace(
+        notVisitedIncrOrder, 
+        0, // index of first element
+        nbNotVisited - 1, // WARN: index of last element, not number of elements
+        costsFromLastVisited
+    );
+
+    // check that notVisitedIncrOrder is sorted
+    for (int i = 0; i < (nbNotVisited-1); i++) {
+        if (nbNotVisited < 2) {
+            break;
+        }
+        if (cost[visited[nbVisited-1]][notVisitedIncrOrder[i]] > cost[visited[nbVisited-1]][notVisitedIncrOrder[i+1]]) {
+            printf("nbNotVisited: %d\n", nbNotVisited);
+            printArray(notVisited, nbNotVisited);
+            
+            printf("Error: notVisitedIncrOrder is not sorted.\n");
+            // print the array
+            printArray(notVisitedIncrOrder, nbNotVisited);
+            printf("\n");
+            // print the cost array for those vertices
+            printf("[");
+            for (int i = 0; i < nbNotVisited - 1; i++) {
+                printf("%d, ", cost[visited[nbVisited-1]][notVisitedIncrOrder[i]]);
+            }
+            printf("%d]", cost[visited[nbVisited-1]][notVisitedIncrOrder[nbNotVisited - 1]]);
+            printf("\n");
+            exit(1);
+        }
+    }
+
+    // recursive call, with reordered notVisited array
+    permutLoop(
+        visited, nbVisited, costVisited,
+        notVisitedIncrOrder, nbNotVisited,
+        cost
+    );
+
+    // clean up
+    free(costsFromLastVisited);
+    free(notVisitedIncrOrder);
 }
 
 int main(int argc, char *argv[]) {
@@ -346,7 +412,6 @@ int main(int argc, char *argv[]) {
         fd  = fopen("python/generated.py", "w");
     
     int** costMatrix = createCost(n);
-    //printCostMatrix(costMatrix, n);
 
     // initializations
     clock_t t = clock();
