@@ -56,31 +56,3 @@ void quicksortInPlace(int arrayOfElements[], int low, int high, int cost[]) {
         quicksortInPlace(arrayOfElements, pivotIndex + 1, high, cost); // After pivot
     }
 }
-
-/**
- * @brief Sorts an array of elements using the quicksort algorithm.
- * It returns a copy of the sorted array, and does not modify 
- * any of the original arrays.
-*/
-int* quicksort(int arrayOfElements[], int nbElements, int cost[]) {
-    // make a copy of the arrays
-    int* arrayOfElementsCopy = malloc(nbElements * sizeof(int));
-    for (int i = 0; i < nbElements; i++) {
-        arrayOfElementsCopy[i] = arrayOfElements[i];
-    }
-    int* costCopy = malloc(nbElements * sizeof(int));
-    for (int i = 0; i < nbElements; i++) {
-        costCopy[i] = cost[i];
-    }
-
-    // sort the copy
-    quicksortInPlace(
-        arrayOfElementsCopy, 0, 
-        nbElements - 1, costCopy
-    );
-    
-    // clean up
-    free(costCopy);
-
-    return arrayOfElementsCopy;
-}

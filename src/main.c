@@ -344,8 +344,7 @@ void permut(
         }
     }
 
-    // reordering notVisited array
-    // reordering notVisitedIncrOrder array
+    // reordering notVisited array (a copy of it)
     // wrt cost of edge from last visited vertex
 
     // make copies of arrays before sorting in place
@@ -358,38 +357,12 @@ void permut(
         notVisitedIncrOrder[i] = notVisited[i];
     }
 
-    //int* costsFromLastVisited = cost[visited[nbVisited-1]];
-
     quicksortInPlace(
         notVisitedIncrOrder, 
         0, // index of first element
         nbNotVisited - 1, // WARN: index of last element, not number of elements
         costsFromLastVisited
     );
-
-    // check that notVisitedIncrOrder is sorted
-    for (int i = 0; i < (nbNotVisited-1); i++) {
-        if (nbNotVisited < 2) {
-            break;
-        }
-        if (cost[visited[nbVisited-1]][notVisitedIncrOrder[i]] > cost[visited[nbVisited-1]][notVisitedIncrOrder[i+1]]) {
-            printf("nbNotVisited: %d\n", nbNotVisited);
-            printArray(notVisited, nbNotVisited);
-            
-            printf("Error: notVisitedIncrOrder is not sorted.\n");
-            // print the array
-            printArray(notVisitedIncrOrder, nbNotVisited);
-            printf("\n");
-            // print the cost array for those vertices
-            printf("[");
-            for (int i = 0; i < nbNotVisited - 1; i++) {
-                printf("%d, ", cost[visited[nbVisited-1]][notVisitedIncrOrder[i]]);
-            }
-            printf("%d]", cost[visited[nbVisited-1]][notVisitedIncrOrder[nbNotVisited - 1]]);
-            printf("\n");
-            exit(1);
-        }
-    }
 
     // recursive call, with reordered notVisited array
     permutLoop(

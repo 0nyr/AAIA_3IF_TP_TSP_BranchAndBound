@@ -409,3 +409,21 @@ Soient n le nombre de sommets et p le nombre d' arêtes du graphe sur lequel on 
 Malheureusement, comme le graphe qui nous intéresse est complet, c'est-à-dire que chaque sommet est connecté à tous les autres sommets, alors on a p = n(n - 1)/2. Dans ce cas, on aurait O(n^2.log n) qui est pire que O(n^2). D'où le fait que l'on n'utilisera pas de file de priorité ici.
 
 ### Partie 7: Ajout d'une heuristique d'ordre
+
+
+On obtient les résultats suivants. On observe que le mur de temps de calculs est maintenant atteint pour `n=52`, ce qui est une amélioration significative.
+
+```shell
+ ❮onyr ★ nixos❯ ❮AAIA_3IF_TP_TSP_BranchAndBound❯❯ for i in 4 28 30 32 34 36 38 40 45 50 52; do ./bin/main $i; done
+n=4, bestCost=31319, nbCalls=6, time=0.000s
+n=28, bestCost=90552, nbCalls=11867, time=0.005s
+n=30, bestCost=104093, nbCalls=18834, time=0.011s
+n=32, bestCost=97563, nbCalls=1655, time=0.001s
+n=34, bestCost=98386, nbCalls=3540, time=0.002s
+n=36, bestCost=99110, nbCalls=8320, time=0.005s
+n=38, bestCost=111108, nbCalls=1384, time=0.001s
+n=40, bestCost=118817, nbCalls=1386, time=0.002s
+n=45, bestCost=127100, nbCalls=1392, time=0.002s
+n=50, bestCost=129422, nbCalls=138467, time=0.052s
+n=52, bestCost=130734, nbCalls=95488710, time=58.517s
+```
