@@ -149,17 +149,27 @@ bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
  * NOTE: Because the base graph is complete, no need to pass a 
  * structure other than the number of vertices and the cost matrix.
 */
-int costPrimMST(int vertices[], int nbVertices, int** cost) {
+int costPrimMST(
+    int baseGraphNbVertices,
+    int vertices[], 
+    int nbVertices, 
+    int** cost
+) {
     int s0 = vertices[0];
 
     // initializations
-    bool* isVisited = (bool*) malloc(nbVertices*sizeof(bool));
+    bool* isVisited = (bool*) malloc(baseGraphNbVertices*sizeof(bool));
+    int* minCostfrom = (int*) malloc(baseGraphNbVertices*sizeof(int));
+    int* predecesor = (int*) malloc(baseGraphNbVertices*sizeof(int));
+    // for (int i = 0; i < baseGraphNbVertices; i++) {
+    //     minCostfrom[i] = INT_MAX;
+    //     predecesor[i] = -1;
+    //     isVisited[i] = false;
+    // }
     isVisited[s0] = true;
     int nbVisited = 1;
-    int* minCostfrom = (int*) malloc(nbVertices*sizeof(int));
-    int* predecesor = (int*) malloc(nbVertices*sizeof(int));
     for (int i = 1; i < nbVertices; i++) {
-        isVisited[i] = false;
+        isVisited[vertices[i]] = false;
         minCostfrom[vertices[i]] = cost[s0][vertices[i]];
         predecesor[vertices[i]] = s0;
     }
@@ -232,7 +242,10 @@ int bound(
     // Now, for every remaining unvisited vertex, we compute
     // the value of the minimum spanning tree (MST) of the
     // remaining unvisited vertices, and add it to the sum.
-    sum += costPrimMST(notVisited, nbNotVisited, cost);
+    sum += costPrimMST(
+        nbNotVisited + nbVisited, // n 
+        notVisited, nbNotVisited, cost
+    );
 
     return sum;
 }

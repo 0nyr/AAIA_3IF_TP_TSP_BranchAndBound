@@ -280,3 +280,130 @@ n=28, bestCost=89676, nbCalls=88340120, time=27.548s
 ```
 
 ### Partie 6: Implémentation d’une fonction `bound` plus sophistiquée
+
+> MST = Minimum Spanning Tree, Arbre Couvrant Minimum.
+
+On peut améliorer la fonction `bound` précédente en calculant une meilleur approximation de la borne inférieur. Pour cela, on se base sur un calcul d'arbre couvrant minimal. Dans l'idée, il s'agit vraiment de faire le même calcul que dans la partie précédente, l'amélioration ici se situe au niveau du fait que, plutôt que de calculer une limite incluant le sommet 0 de fin pour chaque sommet non visité, ici, on aura un meilleur encadrement puisqu'un seul sommet pourra être connecté à l'arrivée 0, au lieu de potentiellement tous avant.
+
+Voici l'implémentation de l'algorithme de Prim, pour notre situation. On note que l'on n'a pas besoin de maintenir l'ensemble E des arcs de l'arbre couvrant minimum, puisqu'on ne s'intéresse qu'à la longueur de l'arborescence (MST) construite par l'algorithme. On notera aussi qu'on n'a pas besoin de passer la structure du graphe de base, puisque celui-ci est complet. Il faut néanmoins passer le nombre de noeud du graphe de base malgré qu'on soit en train de calculer le MST du sous-graph des noeuds non visités, afin de pouvoir initialiser la taille des tableaux correctement.
+
+```c
+int costPrimMST(
+    int baseGraphNbVertices,
+    int vertices[], 
+    int nbVertices, 
+    int** cost
+) {
+    int s0 = vertices[0];
+
+    // initializations
+    bool* isVisited = (bool*) malloc(baseGraphNbVertices*sizeof(bool));
+    int* minCostfrom = (int*) malloc(baseGraphNbVertices*sizeof(int));
+    int* predecesor = (int*) malloc(baseGraphNbVertices*sizeof(int));
+    // for (int i = 0; i < baseGraphNbVertices; i++) {
+    //     minCostfrom[i] = INT_MAX;
+    //     predecesor[i] = -1;
+    //     isVisited[i] = false;
+    // }
+    isVisited[s0] = true;
+    int nbVisited = 1;
+    for (int i = 1; i < nbVertices; i++) {
+        isVisited[vertices[i]] = false;
+        minCostfrom[vertices[i]] = cost[s0][vertices[i]];
+        predecesor[vertices[i]] = s0;
+    }
+
+    while (nbVisited < nbVertices) {
+        // get vertex with minimum cost
+        int minCost = INT_MAX;
+        int sMinCost;
+        for (int i = 1; i < nbVertices; i++) {
+            if (minCostfrom[vertices[i]] < minCost) {
+                minCost = minCostfrom[vertices[i]];
+                sMinCost = vertices[i];
+            }
+        }
+
+        isVisited[sMinCost] = true;
+        nbVisited++;
+
+        for(int i = 1; i < nbVertices; i++) {
+            if (isVisited[vertices[i]] == false &
+                cost[sMinCost][vertices[i]] < minCostfrom[vertices[i]]
+            ) {
+                predecesor[vertices[i]] = sMinCost;
+                minCostfrom[vertices[i]] = cost[sMinCost][vertices[i]];
+            }
+        }
+    }
+
+    // compute sum of costs (sum of all the predecesor arborescence's costs)
+    int sum = 0;
+    for (int i = 1; i < nbVertices; i++) {
+        sum += cost[predecesor[vertices[i]]][vertices[i]];
+    }
+
+    // clean up
+    free(isVisited);
+    free(minCostfrom);
+    free(predecesor);
+
+    return sum;
+}
+```
+
+Il ne reste plus qu'à intégrer cette nouvelle fonction dans la fonction `bound`:
+
+```c
+int bound(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    int sum = 0;
+    // get l, lenght of the smallest edge from the last 
+    // visited vertex to one of the remaining unvisited 
+    // vertices.
+    // Same for lToZero, from any unvisited vertex to 0.
+    int lFromLast, lToZero = INT_MAX;
+    for (int i; i < nbNotVisited; i++) {
+        if (cost[visited[nbVisited-1]][notVisited[i]] < lFromLast) {
+            lFromLast = cost[visited[nbVisited-1]][notVisited[i]];
+        }
+        if (cost[notVisited[i]][0] < lToZero) {
+            lToZero = cost[notVisited[i]][0];
+        }
+    }
+    sum += lFromLast + lToZero;
+
+    // Now, for every remaining unvisited vertex, we compute
+    // the value of the minimum spanning tree (MST) of the
+    // remaining unvisited vertices, and add it to the sum.
+    sum += costPrimMST(
+        nbNotVisited + nbVisited, // n 
+        notVisited, nbNotVisited, cost
+    );
+
+    return sum;
+}
+```
+
+Cette amélioration permet de continuer à augmenter la taille de `n` calculable "rapidement".
+
+```shell
+ ❮onyr ★ nixos❯ ❮AAIA_3IF_TP_TSP_BranchAndBound❯❯ for i in 4 22 24 26 28 30; do ./bin/main $i; done
+n=4, bestCost=31319, nbCalls=8, time=0.000s
+n=22, bestCost=85149, nbCalls=487196, time=0.136s
+n=24, bestCost=91278, nbCalls=3295095, time=0.892s
+n=26, bestCost=90943, nbCalls=11584310, time=3.424s
+n=28, bestCost=93669, nbCalls=29870273, time=10.189s
+n=30, bestCost=95952, nbCalls=158631849, time=57.491s
+```
+
+#### Note sur la non-utilisation d'une file de priorité.
+
+Considéront l'algorithme d'un point de vue théorique. D'après le cours de Christine Solnon:
+
+Soient n le nombre de sommets et p le nombre d' arêtes du graphe sur lequel on veut calculer le MST. L’algorithme passe n − 1 fois dans la boucle `while`. À chaque passage, il faut chercher le sommet de l'ensemble des sommets pas encore visité ayant la plus petite valeur du tableau c (`minCostfrom`) puis parcourir toutes les arêtes adjacentes à ce sommet. Si ces sommets non-visités sont mémorisés dans un tableau ou une liste, la complexité est O(n2). Si on utilise une une file de priorité (implémentation en tas binaire), alors la complexité est O(p.log(n)). En effet, si l'accès se fait en temps constant, il faut aussi compter la mise à jour du tas binaire à chaque fois que l'on modifie le tableau c. Comme il y a au plus p mises à jour de c (une par arête), la complexité de Prim dans ce cas est bien O(p log n).
+
+Malheureusement, comme le graphe qui nous intéresse est complet, c'est-à-dire que chaque sommet est connecté à tous les autres sommets, alors on a p = n(n - 1)/2. Dans ce cas, on aurait O(n^2.log n) qui est pire que O(n^2). D'où le fait que l'on n'utilisera pas de file de priorité ici.

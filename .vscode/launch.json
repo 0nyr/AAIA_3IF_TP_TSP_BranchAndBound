@@ -1,11 +1,35 @@
 {    
     "configurations": [
         {
-            "name": "C (gdb) Launch",
+            "name": "C (gdb) Launch (n=4)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/main",
             "args": ["4"],
+            "stopAtEntry": true,
+            "environment": [],
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "C (gdb) Launch (n=7)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/main",
+            "args": ["7"],
             "stopAtEntry": true,
             "environment": [],
             "cwd": "${workspaceFolder}",
