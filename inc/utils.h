@@ -10,4 +10,6 @@ int getInputNumberOfVertices(int argc, char *argv[]);
 
 bool getGeneratePythonFlag(int argc, char *argv[]);
 
+bool getVerboseFlag(int argc, char *argv[]);
+
 #endif // UTILS_H

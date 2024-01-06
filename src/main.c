@@ -14,7 +14,10 @@ long int nbCalls = 0; // Number of calls to the recursive permut function
 FILE* fd;          // File descriptor of the Python script
 int bestCost = INT_MAX; // Best cost found so far
 
+// CLI flags
 bool generatePython = false;
+bool verbose = false;
+
 
 int nextRand(int n) {
     // Postcondition: return an integer value in [0,n-1], according to a pseudo-random sequence which is initialized with iseed
@@ -29,7 +32,15 @@ int** createCost(int n) {
     // return a symmetrical cost matrix such that, for each i,j in [0,n-1], cost[i][j] = cost of arc (i,j)
     int x[n], y[n];
     int max = 20000;
+
+    for (int i=0; i<n; i++){
+        x[i] = nextRand(max);
+        y[i] = nextRand(max);
+    }
+
+    // allocate memory for cost matrix
     int** cost = (int**) malloc(n*sizeof(int*));
+    for (int i=0; i<n; i++) cost[i] = (int*)malloc(n*sizeof(int));
 
     // init python script
     if (generatePython) {
@@ -90,6 +101,47 @@ void genPythonTurtleTour(int visited[], int n) {
     fprintf(fd, "    wait = input(\"Enter return to continue\")\n\n");
 }
 
+/**
+ * @brief Returns true if the tour would have crossing edges 
+ * by adding newVertex to visited[0..nbVisited-1], 
+ * false otherwise.
+*/
+bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
+    if (nbVisited <= 3) {
+        return false; // no crossing edges with 3 vertices or less
+    }
+    /* check each edge before the last one
+
+    Example:
+    Ⓝ◁---①
+    ╎◸   ◹╎
+    ╎ ╲ ╱ ╎
+    ╎  ╳  ╎
+    ╎ ╱ ╲ ╎
+    ╎╱   ╲╎
+    ⓪---▷Ⓛ
+
+    We check that any edge (⓪->① + Ⓛ->Ⓝ) <= (⓪->Ⓛ + ①->Ⓝ)
+    */
+    // cost Ⓛ->Ⓝ
+    int costLastToNewVectex = cost[newVertex][visited[nbVisited-1]];
+    for (int i = 0; i < (nbVisited-2); i++) {
+        // cost ⓪->①
+        int costItoIPlus1 = cost[visited[i]][visited[i+1]];
+        // cost ⓪->Ⓛ
+        int costItoLast = cost[visited[i]][visited[nbVisited-1]];
+        // cost ①->Ⓝ
+        int costIPlus1toNewVertex = cost[newVertex][visited[i+1]];
+        if (
+            (costItoLast +  costIPlus1toNewVertex)
+            < (costItoIPlus1 + costLastToNewVectex)
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void permut(
     int visited[], int nbVisited, 
     int notVisited[], int nbNotVisited,
@@ -109,20 +161,22 @@ void permut(
         if (generatePython)
             genPythonTurtleTour(visited, nbVisited);
 
-        // log permutation in terminal
-        printf("[");
-        for (int i = 0; i < nbVisited; i++) {
-            printf("%d, ", visited[i]);
-        }
-        printf("0]");
-
-        // compute and display cost
+        // compute cost
         int totalCost = 0;
         for (int i = 0; i < nbVisited-1; i++) {
             totalCost += cost[visited[i]][visited[i+1]];
         }
         totalCost += cost[visited[nbVisited-1]][visited[0]];
-        printf(" cost: %d\n", totalCost);
+
+        if (verbose) {
+            // log permutation in terminal
+            printf("[");
+            for (int i = 0; i < nbVisited; i++) {
+                printf("%d, ", visited[i]);
+            }
+            printf("0]");
+            printf(" cost: %d\n", totalCost);
+        }
 
         // update best cost
         if (totalCost < bestCost) {
@@ -130,6 +184,10 @@ void permut(
         }
     }
     for (int i = 0; i < nbNotVisited; i++) {
+        // constraint: no crossing edges
+        if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+            continue;
+
         // add notVisited[i] to visited
         visited[nbVisited] = notVisited[i];
 
@@ -153,13 +211,27 @@ void permut(
     }
 }
 
+void printCostMatrix(int** cost, int n) {
+    printf("cost matrix:\n");
+    for (int i=0; i<n; i++) {
+        printf("[");
+        for (int j=0; j<n-1; j++) {
+            printf("%d, ", cost[i][j]);
+        }
+        printf("%d]\n", cost[i][n-1]);
+    }
+}
+
 int main(int argc, char *argv[]) {
     int n = getInputNumberOfVertices(argc, argv);
     generatePython = getGeneratePythonFlag(argc, argv);
+    verbose = getVerboseFlag(argc, argv);
 
     if (generatePython)
         fd  = fopen("python/generated.py", "w");
+    
     int** costMatrix = createCost(n);
+    //printCostMatrix(costMatrix, n);
 
     // initializations
     clock_t t = clock();
@@ -176,7 +248,10 @@ int main(int argc, char *argv[]) {
     // clean up
     if (generatePython)
         fclose(fd);
+
+    // clean up cost matrix
     for (int i = 0; i < n; i++) free(costMatrix[i]);
+    free (costMatrix);
 
     return 0;
 }

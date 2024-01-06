@@ -5,10 +5,10 @@ from utils import mark_point
 def draw_path_permutations(turtle_speed):
     # Configuration initiale
     turtle.setworldcoordinates(0, 0, 20000, 20100)
-    p0=(16807,15249)
-    p1=(10073,3658)
-    p2=(8930,11272)
-    p3=(7544,10878)
+    p0=(17923,17709)
+    p1=(4440,18165)
+    p2=(4492,3042)
+    p3=(7987,2503)
 
 
     # Affichage des points

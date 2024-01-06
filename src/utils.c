@@ -42,9 +42,27 @@ int getInputNumberOfVertices(int argc, char *argv[]) {
 bool getGeneratePythonFlag(int argc, char *argv[]) {
     bool generatePython = false;
     if (argc >= 3) {
-        if (strcmp(argv[2], "-g") == 0) {
-            generatePython = true;
+        for (int i = 2; i < argc; i++) {
+            if (strcmp(argv[i], "-g") == 0) {
+                generatePython = true;
+            }
         }
     }
     return generatePython;
+}
+
+/**
+ * @brief Returns true if the "verbose(-v)" option is given,
+ * or false otherwise.
+*/
+bool getVerboseFlag(int argc, char *argv[]) {
+    bool verbose = false;
+    if (argc >= 3) {
+        for (int i = 2; i < argc; i++) {
+            if (strcmp(argv[i], "-v") == 0) {
+                verbose = true;
+            }
+        }
+    }
+    return verbose;
 }

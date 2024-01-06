@@ -2,7 +2,7 @@
 
 ### Q1: compléter `permut`
 
-Solution possible:
+Ci-dessous, une solution possible:
 
 ```python
 void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
@@ -46,6 +46,19 @@ void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
 }
 ```
 
+Cela permet d'exécuter le programme. Exemple pour `n = 4`:
+
+```shell
+./bin/main 4
+0 1 3 2 0
+0 1 2 3 0
+0 2 1 3 0
+0 2 3 1 0
+0 3 1 2 0
+0 3 2 1 0
+n=4 nbCalls=16 time=0.000s
+```
+
 ### Q2: calcul de longueur des circuits hamiltoniens
 
 Dans cette étape, on modifie `createCost` pour qu'elle renvoie un `int**`, la matrice des coûts.
@@ -62,9 +75,19 @@ On peut alors fournir cette matrice à `permut` en modifiant ses paramètres. On
         printf(" cost: %d\n", totalCost);
 ```
 
-Ce code permet de calculer et d'afficher la valeur du chemin.
+Ce code permet de calculer et d'afficher la valeur du chemin. On obtient par exemple, pour `n = 4`:
 
-### Q3: Recherche du plus court circuit hamiltonien
+```shell
+[0, 1, 3, 2, 0] cost: 31319
+[0, 1, 2, 3, 0] cost: 32786
+[0, 2, 1, 3, 0] cost: 34415
+[0, 2, 3, 1, 0] cost: 31319
+[0, 3, 1, 2, 0] cost: 34415
+[0, 3, 2, 1, 0] cost: 32786
+n=4 nbCalls=16 time=0.000s
+```
+
+### Partie 3: Recherche du plus court circuit hamiltonien
 
 On ajoute une variable globale:
 
@@ -92,8 +115,93 @@ void permut(
 }
 ```
 
-Cette modification simple permet de maintenir à jour la valeur du meilleur coût rencontré.
+Cette modification simple permet de maintenir à jour la valeur du meilleur coût rencontré. On obtient par exemple, pour `n = 4`:
+
+```shell
+$ ./bin/main 4 -g
+[0, 1, 3, 2, 0] cost: 31319
+[0, 1, 2, 3, 0] cost: 32786
+[0, 2, 1, 3, 0] cost: 34415
+[0, 2, 3, 1, 0] cost: 31319
+[0, 3, 1, 2, 0] cost: 34415
+[0, 3, 2, 1, 0] cost: 32786
+best cost: 31319
+n=4 nbCalls=16 time=0.000s
+```
 
 *Comparez ces temps d’exécution à ceux du programme utilisant un principe de programmation dynamique.*
 
 TODO: Répondre
+
+### Partie 4: Propagation de contraintes
+
+*Montrez qu’une conséquence de cette propriété est que la solution optimale ne peut pas contenir deux arêtes qui se croisent.*
+
+Preuve par l'absurde.
+
+On suppose Copti, chemin hamiltonien optimal de longueur la plus faible. On suppose également qu'il existe deux indices i et j (avec 0 ≤ i < j ≤ n) tels que les arcs (vi, vi+1) et (vj , vj+1) se croisent, ces arcs étants des arcs de Copti.
+
+On transforme Copti en Copti prime tel que Copti est un chemin hamiltonien avec les mêmes arcs que Copti à la différences des arcs (vi, vi+1) et (vj , vj+1), remplacés par les arcs (vi, vj) et (vi+1, vj+1).
+
+D'après la propriété longueur(Copti') <= longueur(Copti). Contradiction.
+
+On déduit que la solution optimale Copti ne peut pas contenir deux arêtes qui se croisent.
+
+*Nouvelle modification du code pour éliminer ces cas de la recherche.*
+
+Soit i un entier tel que i appartient à {0, ..., k - 1}, avec k le nombre de sommet visités dans le chemin à l'étape k. A l'étape k, on cherche à ajouter un k+1ème sommet.
+
+Pour vérifier que l'on ajoute pas d'arc qui croise les arcs déjà présent dans le chemin à une étape donnée, on vérifie que la longueur additionné Longeur(Vi -> Vi+1) + Longueur(Vk -> Vk+1) <= Longueur(Vi -> Vk) + Longueur(Vi+1 -> Vk+1).
+
+On modifie ainsi le code de la fonction `permut`. Dans la bouche `for`, on ajoute:
+
+```c
+// constraint: no crossing edges
+        if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+            continue;
+```
+
+On définit ensuite la fonction `hasCrossingEdges` qui détecte si le noeud que l'on cherche à ajouter va créer un croisement d'arc.
+
+```c
+bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
+    if (nbVisited <= 3) {
+        return false; // no crossing edges with 3 vertices or less
+    }
+    // Longueur(Vk -> Vk+1)
+    int costLastToNewVectex = cost[newVertex][visited[nbVisited-1]];
+    for (int i = 0; i < (nbVisited-2); i++) {
+        // Longueur(Vi -> Vi+1)
+        int costItoIPlus1 = cost[visited[i]][visited[i+1]];
+        // Longueur(Vi -> Vk)
+        int costItoLast = cost[visited[i]][visited[nbVisited-1]];
+        // Longueur(Vi+1 -> Vk+1)
+        int costIPlus1toNewVertex = cost[newVertex][visited[i+1]];
+        if (
+            (costItoLast +  costIPlus1toNewVertex)
+            < (costItoIPlus1 + costLastToNewVectex)
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+On peut alors effectuer des calculs sur des valeurs de `n` plus élevées:
+
+```shell
+ ❮onyr ★ nixos❯ ❮AAIA_3IF_TP_TSP_BranchAndBound❯❯ for i in 14 16 18 20 22 24; do ./bin/main $i; done
+best cost: 69382
+n=14 nbCalls=151861 time=0.010s
+best cost: 70310
+n=16 nbCalls=978013 time=0.051s
+best cost: 75456
+n=18 nbCalls=6065015 time=0.341s
+best cost: 81292
+n=20 nbCalls=32165315 time=2.010s
+best cost: 82447
+n=22 nbCalls=174134399 time=11.980s
+best cost: 83193
+n=24 nbCalls=1032192967 time=77.010s
+```

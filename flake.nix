@@ -30,6 +30,7 @@
             # C
             pkgs.gcc
             pkgs.gnumake
+            pkgs.gdb
 
             # Python
             pythonPackages.python
