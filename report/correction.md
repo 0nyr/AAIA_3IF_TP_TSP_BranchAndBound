@@ -206,7 +206,7 @@ best cost: 83193
 n=24 nbCalls=1032192967 time=77.010s
 ```
 
-### Partie 5: Implémentation de `bound` simple.
+### Partie 5: Implémentation de `bound` simple
 
 On implémente la fonction `bound`, Cette fonction d’évaluation calcule une borne inférieure de la longueur du plus court chemin allant du dernier sommet visité jusqu’à 0 en passant par chaque sommet non visité exactement une fois.
 
@@ -278,3 +278,5 @@ n=24, bestCost=84078, nbCalls=15779770, time=3.788s
 n=26, bestCost=88141, nbCalls=29627046, time=7.679s
 n=28, bestCost=89676, nbCalls=88340120, time=27.548s
 ```
+
+### Partie 6: Implémentation d’une fonction `bound` plus sophistiquée

@@ -143,6 +143,66 @@ bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
 }
 
 /**
+ * @brief Returns the cost of the Minimum Spanning Tree (MST)
+ * of given vertices.
+ * 
+ * NOTE: Because the base graph is complete, no need to pass a 
+ * structure other than the number of vertices and the cost matrix.
+*/
+int costPrimMST(int vertices[], int nbVertices, int** cost) {
+    int s0 = vertices[0];
+
+    // initializations
+    bool* isVisited = (bool*) malloc(nbVertices*sizeof(bool));
+    isVisited[s0] = true;
+    int nbVisited = 1;
+    int* minCostfrom = (int*) malloc(nbVertices*sizeof(int));
+    int* predecesor = (int*) malloc(nbVertices*sizeof(int));
+    for (int i = 1; i < nbVertices; i++) {
+        isVisited[i] = false;
+        minCostfrom[vertices[i]] = cost[s0][vertices[i]];
+        predecesor[vertices[i]] = s0;
+    }
+
+    while (nbVisited < nbVertices) {
+        // get vertex with minimum cost
+        int minCost = INT_MAX;
+        int sMinCost;
+        for (int i = 1; i < nbVertices; i++) {
+            if (minCostfrom[vertices[i]] < minCost) {
+                minCost = minCostfrom[vertices[i]];
+                sMinCost = vertices[i];
+            }
+        }
+
+        isVisited[sMinCost] = true;
+        nbVisited++;
+
+        for(int i = 1; i < nbVertices; i++) {
+            if (isVisited[vertices[i]] == false &
+                cost[sMinCost][vertices[i]] < minCostfrom[vertices[i]]
+            ) {
+                predecesor[vertices[i]] = sMinCost;
+                minCostfrom[vertices[i]] = cost[sMinCost][vertices[i]];
+            }
+        }
+    }
+
+    // compute sum of costs (sum of all the predecesor arborescence's costs)
+    int sum = 0;
+    for (int i = 1; i < nbVertices; i++) {
+        sum += cost[predecesor[vertices[i]]][vertices[i]];
+    }
+
+    // clean up
+    free(isVisited);
+    free(minCostfrom);
+    free(predecesor);
+
+    return sum;
+}
+
+/**
  * @brief Evaluation function (bound), that returns
  * a lower bound of the cost of a path from the last 
  * visited vertex to the end of the tour (vertex 0), 
@@ -156,33 +216,23 @@ int bound(
     int sum = 0;
     // get l, lenght of the smallest edge from the last 
     // visited vertex to one of the remaining unvisited 
-    // vertices
-    int l = INT_MAX;
+    // vertices.
+    // Same for lToZero, from any unvisited vertex to 0.
+    int lFromLast, lToZero = INT_MAX;
     for (int i; i < nbNotVisited; i++) {
-        if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
-            l = cost[visited[nbVisited-1]][notVisited[i]];
+        if (cost[visited[nbVisited-1]][notVisited[i]] < lFromLast) {
+            lFromLast = cost[visited[nbVisited-1]][notVisited[i]];
+        }
+        if (cost[notVisited[i]][0] < lToZero) {
+            lToZero = cost[notVisited[i]][0];
         }
     }
-    sum += l;
+    sum += lFromLast + lToZero;
 
-    // Now, for every remaining unvisited vertex, we determine
-    // l' the length of the smallest edge from this vertex to
-    // one of the remaining unvisited vertices, or to the end
-    // of the tour (vertex 0).
-    for (int i = 0; i < nbNotVisited; i++) {
-        int lPrime = INT_MAX;
-        // remaining unvisited vertices
-        for (int j = 0; j < nbNotVisited; j++) {
-            if (cost[notVisited[i]][notVisited[j]] < lPrime) {
-                lPrime = cost[notVisited[i]][notVisited[j]];
-            }
-        }
-        // vertex 0
-        if (cost[notVisited[i]][0] < lPrime) {
-            lPrime = cost[notVisited[i]][0];
-        }
-        sum += lPrime;
-    }
+    // Now, for every remaining unvisited vertex, we compute
+    // the value of the minimum spanning tree (MST) of the
+    // remaining unvisited vertices, and add it to the sum.
+    sum += costPrimMST(notVisited, nbNotVisited, cost);
 
     return sum;
 }
