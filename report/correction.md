@@ -1,6 +1,6 @@
 # Notes de corrections
 
-### Q1: compléter `permut`
+### Partie 1: compléter `permut`
 
 Ci-dessous, une solution possible:
 
@@ -59,7 +59,7 @@ Cela permet d'exécuter le programme. Exemple pour `n = 4`:
 n=4 nbCalls=16 time=0.000s
 ```
 
-### Q2: calcul de longueur des circuits hamiltoniens
+### Partie 2: calcul de longueur des circuits hamiltoniens
 
 Dans cette étape, on modifie `createCost` pour qu'elle renvoie un `int**`, la matrice des coûts.
 
@@ -131,7 +131,7 @@ n=4 nbCalls=16 time=0.000s
 
 *Comparez ces temps d’exécution à ceux du programme utilisant un principe de programmation dynamique.*
 
-TODO: Répondre
+TODO: Répondre, faire le TD en question.
 
 ### Partie 4: Propagation de contraintes
 
@@ -204,4 +204,77 @@ best cost: 82447
 n=22 nbCalls=174134399 time=11.980s
 best cost: 83193
 n=24 nbCalls=1032192967 time=77.010s
+```
+
+### Partie 5: Implémentation de `bound` simple.
+
+On implémente la fonction `bound`, Cette fonction d’évaluation calcule une borne inférieure de la longueur du plus court chemin allant du dernier sommet visité jusqu’à 0 en passant par chaque sommet non visité exactement une fois.
+
+```c
+int bound(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    int sum = 0;
+    // get l, lenght of the smallest edge from the last 
+    // visited vertex to one of the remaining unvisited 
+    // vertices
+    int l = INT_MAX;
+    for (int i; i < nbNotVisited; i++) {
+        if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
+            l = cost[visited[nbVisited-1]][notVisited[i]];
+        }
+    }
+    sum += l;
+
+    // Now, for every remaining unvisited vertex, we determine
+    // l' the length of the smallest edge from this vertex to
+    // one of the remaining unvisited vertices, or to the end
+    // of the tour (vertex 0).
+    for (int i = 0; i < nbNotVisited; i++) {
+        int lPrime = INT_MAX;
+        // remaining unvisited vertices
+        for (int j = 0; j < nbNotVisited; j++) {
+            if (cost[notVisited[i]][notVisited[j]] < lPrime) {
+                lPrime = cost[notVisited[i]][notVisited[j]];
+            }
+        }
+        // vertex 0
+        if (cost[notVisited[i]][0] < lPrime) {
+            lPrime = cost[notVisited[i]][0];
+        }
+        sum += lPrime;
+    }
+
+    return sum;
+}
+```
+
+On peut alors intégrer cette fonction afin de limiter le nombre de récursions dans `permut`. Mais d'abord, il nous fait un moyen de conserver la longueur du parcours en cours. On pourrait recalculer cette valeur à chaque fois, mais ça serait peu efficace. On préfèrera la passer comme un paramètre. On modifie la fonction `permut` avec un nouveau paramètre `int costVisited`. Au premier appel de permut, cette valeur sera de 0 puisqu'aucun sommet n'a été visité.
+
+On peut alors ajouter, dans la boucle `for` et après la vérification de non-croisement, le code suivant:
+
+```c
+// constraint: bound
+        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
+        int boundedCost = nextCost + bound(
+            visited, nbVisited, 
+            notVisited, nbNotVisited,
+            cost
+        );
+        if (boundedCost > bestCost)
+            continue;
+```
+
+Cette amélioration nous permet de faire des calculs avec des valeurs de `n` toujours plus grande:
+
+```shell
+ ❮onyr ★ nixos❯ ❮AAIA_3IF_TP_TSP_BranchAndBound❯❯ for i in 4 20 22 24 26 28; do ./bin/main $i; done
+n=4, bestCost=31319, nbCalls=8, time=0.000s
+n=20, bestCost=84729, nbCalls=819954, time=0.164s
+n=22, bestCost=85149, nbCalls=3507653, time=0.815s
+n=24, bestCost=84078, nbCalls=15779770, time=3.788s
+n=26, bestCost=88141, nbCalls=29627046, time=7.679s
+n=28, bestCost=89676, nbCalls=88340120, time=27.548s
 ```

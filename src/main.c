@@ -142,8 +142,53 @@ bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
     return false;
 }
 
-void permut(
+/**
+ * @brief Evaluation function (bound), that returns
+ * a lower bound of the cost of a path from the last 
+ * visited vertex to the end of the tour (vertex 0), 
+ * passing by all the remaining unvisited vertices.
+*/
+int bound(
     int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    int sum = 0;
+    // get l, lenght of the smallest edge from the last 
+    // visited vertex to one of the remaining unvisited 
+    // vertices
+    int l = INT_MAX;
+    for (int i; i < nbNotVisited; i++) {
+        if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
+            l = cost[visited[nbVisited-1]][notVisited[i]];
+        }
+    }
+    sum += l;
+
+    // Now, for every remaining unvisited vertex, we determine
+    // l' the length of the smallest edge from this vertex to
+    // one of the remaining unvisited vertices, or to the end
+    // of the tour (vertex 0).
+    for (int i = 0; i < nbNotVisited; i++) {
+        int lPrime = INT_MAX;
+        // remaining unvisited vertices
+        for (int j = 0; j < nbNotVisited; j++) {
+            if (cost[notVisited[i]][notVisited[j]] < lPrime) {
+                lPrime = cost[notVisited[i]][notVisited[j]];
+            }
+        }
+        // vertex 0
+        if (cost[notVisited[i]][0] < lPrime) {
+            lPrime = cost[notVisited[i]][0];
+        }
+        sum += lPrime;
+    }
+
+    return sum;
+}
+
+void permut(
+    int visited[], int nbVisited, int costVisited,
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
@@ -161,12 +206,8 @@ void permut(
         if (generatePython)
             genPythonTurtleTour(visited, nbVisited);
 
-        // compute cost
-        int totalCost = 0;
-        for (int i = 0; i < nbVisited-1; i++) {
-            totalCost += cost[visited[i]][visited[i+1]];
-        }
-        totalCost += cost[visited[nbVisited-1]][visited[0]];
+        // compute cost, don't forget to add the cost of the last edge
+        costVisited += cost[visited[nbVisited-1]][0];
 
         if (verbose) {
             // log permutation in terminal
@@ -175,17 +216,28 @@ void permut(
                 printf("%d, ", visited[i]);
             }
             printf("0]");
-            printf(" cost: %d\n", totalCost);
+            printf(" cost: %d\n", costVisited);
         }
 
         // update best cost
-        if (totalCost < bestCost) {
-            bestCost = totalCost;
+        if (costVisited < bestCost) {
+            bestCost = costVisited;
         }
     }
+
     for (int i = 0; i < nbNotVisited; i++) {
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+            continue;
+        
+        // constraint: bound
+        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
+        int boundedCost = nextCost + bound(
+            visited, nbVisited, 
+            notVisited, nbNotVisited,
+            cost
+        );
+        if (boundedCost > bestCost)
             continue;
 
         // add notVisited[i] to visited
@@ -200,7 +252,7 @@ void permut(
 
         // recursive call
         permut(
-            visited, nbVisited+1, 
+            visited, nbVisited+1, nextCost,
             notVisited, nbNotVisited-1,
             cost    
         );
@@ -241,9 +293,14 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < (n-1); i++)
         notVisited[i] = i+1;
     
-    permut(visited, 1, notVisited, n-1, costMatrix);
-    printf("best cost: %d\n", bestCost);
-    printf("n=%d nbCalls=%ld time=%.3fs\n", n, nbCalls, ((double) (clock() - t)) / CLOCKS_PER_SEC);
+    permut(visited, 1, 0, notVisited, n-1, costMatrix);
+    printf(
+        "n=%d, bestCost=%d, nbCalls=%ld, time=%.3fs\n",
+        n, 
+        bestCost,
+        nbCalls, 
+        ((double) (clock() - t)) / CLOCKS_PER_SEC
+    );
     
     // clean up
     if (generatePython)
