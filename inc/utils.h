@@ -4,6 +4,7 @@
 #include <stdio.h>  // For printf
 #include <stdlib.h> // For exit() and atoi()
 #include <stdbool.h> // For bool type
+#include <string.h> // For strcmp()
 
 int getInputNumberOfVertices(int argc, char *argv[]);
 

@@ -66,6 +66,34 @@ Ce code permet de calculer et d'afficher la valeur du chemin.
 
 ### Q3: Recherche du plus court circuit hamiltonien
 
+On ajoute une variable globale:
+
+```c
+int bestCost = INT_MAX; // Best cost found so far
+```
+
+On modifie ensuite la fonction `permut` pour qu'elle puisse tenir la variable `bestCost` à jour.
+
+```c
+void permut(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    if (nbNotVisited == 0) {
+        [...]
+
+        // update best cost
+        if (totalCost < bestCost) {
+            bestCost = totalCost;
+        }
+    }
+    [...]
+}
+```
+
+Cette modification simple permet de maintenir à jour la valeur du meilleur coût rencontré.
+
 *Comparez ces temps d’exécution à ceux du programme utilisant un principe de programmation dynamique.*
 
 TODO: Répondre

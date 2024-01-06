@@ -41,7 +41,7 @@ int getInputNumberOfVertices(int argc, char *argv[]) {
 */
 bool getGeneratePythonFlag(int argc, char *argv[]) {
     bool generatePython = false;
-    if (argc > 2) {
+    if (argc >= 3) {
         if (strcmp(argv[2], "-g") == 0) {
             generatePython = true;
         }
