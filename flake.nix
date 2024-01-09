@@ -23,6 +23,9 @@
             
             # Adding Java for LTeX spell checker (vscode extension)
             pkgs.openjdk
+
+            # Document converter
+            pkgs.pandoc
           ];
 
           # package needed at build and runtime.

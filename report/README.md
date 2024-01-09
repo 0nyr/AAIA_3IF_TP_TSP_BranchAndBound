@@ -2,9 +2,9 @@
 
 Notes about local LaTeX editing and  compiling.
 
-## Commands
+# Commands & tools
 
-### compiling
+## compiling LaTeX
 
 `latexmk main.tex`
 
@@ -16,7 +16,7 @@ Notes about local LaTeX editing and  compiling.
 
 `pdflatex main.tex`
 
-## LTex Spell Checker
+### LTex Spell Checker
 
 > @ext:valentjn.vscode-ltex
 
@@ -25,3 +25,7 @@ Notes about local LaTeX editing and  compiling.
 Look inside `.vscode/settings.json` for extension language setting. 
 
 > WARN: Only one language can be used for a given file at a time.
+
+## Pandoc (Markdown to PDF)
+
+`pandoc report/correction.md -o report/correction.pdf --pdf-engine=xelatex`: compile a Markdown file into a PDF file.

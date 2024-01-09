@@ -8,3 +8,6 @@ bin/
 # Python
 __pycache__/
 *.pyc
+
+# pandoc & latex
+*.log
