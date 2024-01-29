@@ -269,6 +269,9 @@ void permutLoop(
     int** cost
 ) {
     for (int i = 0; i < nbNotVisited; i++) {
+        // add notVisited[i] to visited
+        visited[nbVisited] = notVisited[i];
+        
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
@@ -282,9 +285,6 @@ void permutLoop(
         );
         if (boundedCost > bestCost)
             continue;
-
-        // add notVisited[i] to visited
-        visited[nbVisited] = notVisited[i];
 
         // remove notVisited[i] from notVisited
         // we need to swap notVisited[i] with notVisited[nbNotVisited-1] for 

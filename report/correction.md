@@ -5,7 +5,6 @@ header-includes:
 mainfont: Tinos
 monofont: 'JetBrainsMono Nerd Font'
 ---
-
 # AAIA 3IF - TP TSP Branch & Bound
 
 Florian Rascoussier, Janvier 2024
@@ -15,11 +14,12 @@ Florian Rascoussier, Janvier 2024
 Dans ce TP, nous nous intéresseront à un problème bien connu en Informatique, et à une famille d'algorithme non moins célèbre pour s'y attaquer.
 
 ### Le Problème du Voyageur de Commerce (TSP)
-Le Travelling Salesman Problem (TSP) ou Problème du Voyageur de Commerce est un problème fondamental en optimisation combinatoire et en théorie des graphes. 
+
+Le Travelling Salesman Problem (TSP) ou Problème du Voyageur de Commerce est un problème fondamental en optimisation combinatoire et en théorie des graphes.
 
 Le problème se formule de la manière suivante :
 
->"Étant donné une liste de villes et les distances entre chaque paire de villes, quel est le chemin le plus court possible qui visite chaque ville exactement une fois et revient à la ville d'origine ?"
+> "Étant donné une liste de villes et les distances entre chaque paire de villes, quel est le chemin le plus court possible qui visite chaque ville exactement une fois et revient à la ville d'origine ?"
 
 Ce problème est notoire non seulement pour sa simplicité conceptuelle, mais aussi pour sa difficulté computationnelle, car il appartient à la classe des problèmes NP-complets. Cela signifie que, pour un grand nombre de villes, il est extrêmement difficile de calculer la solution exacte en un temps raisonnable. Le TSP a des applications pratiques dans de nombreux domaines tels que la planification d'itinéraires, la logistique et même la conception de circuits électroniques.
 
@@ -198,7 +198,7 @@ On suppose `Copti`, chemin hamiltonien optimal de longueur la plus faible. On su
 
 On transforme `Copti` en `Copti'` prime tel que `Copti'` est un chemin hamiltonien avec les mêmes arcs que `Copti` à la différence des arcs `(vi, vi+1)` et `(vj , vj+1)`, remplacés par les arcs `(vi, vj)` et `(vi+1, vj+1)`.
 
-D'après la propriété `Longueur(Copti') <= Longueur(Copti)`. Contradiction.
+D'après la propriété (sur les chemins Hamiltoniens avec croisements), `Longueur(Copti') <= Longueur(Copti)`. Contradiction, puisqu'une Copti est par définition optimal, il ne devrait pas y avoir de chemin plus court!
 
 On déduit que la solution optimale `Copti` ne peut pas contenir deux arêtes qui se croisent.
 
@@ -467,9 +467,9 @@ Malheureusement, comme le graphe qui nous intéresse est complet, c'est-à-dire 
 
 On peut encore améliorer nos résultats simplement, en guidant la récusion dans `permut` pour que soient explorés en premier les plus courts circuits. En effet, cela permettra alors d'élaguer les chemins moins intéressants encore plus rapidement, et donc d'accélérer le processus de recherche.
 
-Pour cela, on dispose d'une *heuristique d'ordre* simple: Visiter d'abord les sommets les plus proches du dernier sommet visité. 
+Pour cela, on dispose d'une *heuristique d'ordre* simple: Visiter d'abord les sommets les plus proches du dernier sommet visité.
 
-On modifie en conséquence la fonction `permut`. On commence par sortir la boucle `for` dans une sous-fonction `permutLoop`. Cela sera utile pour compartimenter le code, et surtout éviter de renommer le tableau `notVisited` que l'on va devoir réordonner à chaque passage dans `permut`. 
+On modifie en conséquence la fonction `permut`. On commence par sortir la boucle `for` dans une sous-fonction `permutLoop`. Cela sera utile pour compartimenter le code, et surtout éviter de renommer le tableau `notVisited` que l'on va devoir réordonner à chaque passage dans `permut`.
 
 ```c
 /**
@@ -492,7 +492,7 @@ void permutLoop(
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
-        
+      
         // constraint: bound
         int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
         int boundedCost = nextCost + bound(
@@ -517,9 +517,9 @@ void permutLoop(
         permut(
             visited, nbVisited+1, nextCost,
             notVisited, nbNotVisited-1,
-            cost    
+            cost  
         );
-        
+      
         // backtrack
         notVisited[nbNotVisited-1] = notVisited[i];
         notVisited[i] = tmp;
@@ -609,7 +609,7 @@ free(notVisitedIncrOrder);
 
 Ceci permet de trier le tableau de sommets `notVisited` en un tableau trié dans l'ordre croissant des coûts de chaque arc depuis le dernier sommet visité jusqu'à chacun des sommets du tableau. Pour effectuer le tri, on dispose de pas mal de possibilités. J'ai ici choisi l'algorithme `quicksort` parce qu'il est plutôt efficate, élégant et simple à implémenter. Néanmoins, d'autres algorithmes plus performants existent ([voir comparaison](https://builtin.com/machine-learning/fastest-sorting-algorithm), [voir visualisation](https://www.toptal.com/developers/sorting-algorithms)).
 
-On obtient les résultats suivants : 
+On obtient les résultats suivants :
 
 ```shell
 $ for i in 4 28 30 32 34 36 38 40 45 50 52; do ./bin/main $i; done
