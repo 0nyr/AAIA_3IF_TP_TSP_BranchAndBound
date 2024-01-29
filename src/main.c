@@ -103,15 +103,13 @@ void genPythonTurtleTour(int visited[], int n) {
     fprintf(fd, "    wait = input(\"Enter return to continue\")\n\n");
 }
 
-/**
- * @brief Returns true if the tour would have crossing edges 
- * by adding newVertex to visited[0..nbVisited-1], 
- * false otherwise.
-*/
-bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
-    if (nbVisited <= 3) {
-        return false; // no crossing edges with 3 vertices or less
-    }
+bool isCrossing(
+    int node0, 
+    int node1,
+    int nodeLast, 
+    int nodeNew,
+    int** cost
+) {
     /* check each edge before the last one
 
     Example:
@@ -126,18 +124,49 @@ bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
     We check that any edge (⓪->① + Ⓛ->Ⓝ) <= (⓪->Ⓛ + ①->Ⓝ)
     */
     // cost Ⓛ->Ⓝ
-    int costLastToNewVectex = cost[newVertex][visited[nbVisited-1]];
-    for (int i = 0; i < (nbVisited-2); i++) {
-        // cost ⓪->①
-        int costItoIPlus1 = cost[visited[i]][visited[i+1]];
-        // cost ⓪->Ⓛ
-        int costItoLast = cost[visited[i]][visited[nbVisited-1]];
-        // cost ①->Ⓝ
-        int costIPlus1toNewVertex = cost[newVertex][visited[i+1]];
-        if (
-            (costItoLast +  costIPlus1toNewVertex)
-            < (costItoIPlus1 + costLastToNewVectex)
-        ) {
+    int costLastToNew = cost[nodeLast][nodeNew];
+    // cost ⓪->①
+    int cost0to1 = cost[node0][node1];
+    // cost ⓪->Ⓛ
+    int cost0toLast = cost[node0][nodeLast];
+    // cost ①->Ⓝ
+    int cost1toNew = cost[node1][nodeNew];
+    if (
+        (cost0toLast + cost1toNew) // cost ⓪->Ⓛ + ①->Ⓝ
+        < (cost0to1 + costLastToNew) // cost ⓪->① + Ⓛ->Ⓝ
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/**
+ * @brief Returns true if the tour would have crossing edges 
+ * by adding newVertex to visited[0..nbVisited-1], 
+ * false otherwise.
+*/
+bool hasCrossingEdges(
+    int visited[], 
+    int nbVisited, 
+    int newVertex, 
+    int** cost
+) {
+    if (nbVisited <= 3) {
+        return false; // no crossing edges with 3 vertices or less
+    }
+    /* check each edge before the last one
+    that adding the edge (Ⓛ->Ⓝ) would not create a crossing edge
+    with previously visited edges (⓪->①)
+    */
+    for (int i = 0; i < nbVisited - 1; i++) { // from first to last but one
+    
+        if (isCrossing(
+            visited[i], visited[i+1],
+            visited[nbVisited-1], newVertex,
+            cost
+        )) {
             return true;
         }
     }
@@ -269,22 +298,13 @@ void permutLoop(
     int** cost
 ) {
     for (int i = 0; i < nbNotVisited; i++) {
-        // add notVisited[i] to visited
-        visited[nbVisited] = notVisited[i];
-        
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
-        
-        // constraint: bound
-        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
-        int boundedCost = nextCost + bound(
-            visited, nbVisited, 
-            notVisited, nbNotVisited,
-            cost
-        );
-        if (boundedCost > bestCost)
-            continue;
+
+        // add notVisited[i] to visited 
+        // WARN: Need to be done BEFORE checking constraints
+        visited[nbVisited] = notVisited[i];
 
         // remove notVisited[i] from notVisited
         // we need to swap notVisited[i] with notVisited[nbNotVisited-1] for 
@@ -292,6 +312,16 @@ void permutLoop(
         int tmp = notVisited[i];
         notVisited[i] = notVisited[nbNotVisited-1];
         notVisited[nbNotVisited-1] = tmp;
+        
+        // constraint: bound
+        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
+        // int boundedCost = nextCost + bound(
+        //     visited, nbVisited, 
+        //     notVisited, nbNotVisited,
+        //     cost
+        // );
+        // if (boundedCost > bestCost)
+        //     continue;
 
         // recursive call
         permut(
@@ -348,32 +378,33 @@ void permut(
     // wrt cost of edge from last visited vertex
 
     // make copies of arrays before sorting in place
-    int* costsFromLastVisited = (int*) malloc(nbNotVisited*sizeof(int));
-    for (int i = 0; i < nbNotVisited; i++) {
-        costsFromLastVisited[i] = cost[visited[nbVisited-1]][notVisited[i]];
-    }
-    int* notVisitedIncrOrder = (int*) malloc(nbNotVisited*sizeof(int));
-    for (int i = 0; i < nbNotVisited; i++) {
-        notVisitedIncrOrder[i] = notVisited[i];
-    }
+    // int* costsFromLastVisited = (int*) malloc(nbNotVisited*sizeof(int));
+    // for (int i = 0; i < nbNotVisited; i++) {
+    //     costsFromLastVisited[i] = cost[visited[nbVisited-1]][notVisited[i]];
+    // }
+    // int* notVisitedIncrOrder = (int*) malloc(nbNotVisited*sizeof(int));
+    // for (int i = 0; i < nbNotVisited; i++) {
+    //     notVisitedIncrOrder[i] = notVisited[i];
+    // }
 
-    quicksortInPlace(
-        notVisitedIncrOrder, 
-        0, // index of first element
-        nbNotVisited - 1, // WARN: index of last element, not number of elements
-        costsFromLastVisited
-    );
+    // quicksortInPlace(
+    //     notVisitedIncrOrder, 
+    //     0, // index of first element
+    //     nbNotVisited - 1, // WARN: index of last element, not number of elements
+    //     costsFromLastVisited
+    // );
 
     // recursive call, with reordered notVisited array
     permutLoop(
         visited, nbVisited, costVisited,
-        notVisitedIncrOrder, nbNotVisited,
+        //notVisitedIncrOrder, nbNotVisited,
+        notVisited, nbNotVisited,
         cost
     );
 
     // clean up
-    free(costsFromLastVisited);
-    free(notVisitedIncrOrder);
+    // free(costsFromLastVisited);
+    // free(notVisitedIncrOrder);
 }
 
 int main(int argc, char *argv[]) {

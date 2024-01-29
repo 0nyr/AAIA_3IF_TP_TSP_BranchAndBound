@@ -184,6 +184,12 @@ best cost: 31319
 n=4 nbCalls=16 time=0.000s
 ```
 
+```shell
+n=8, bestCost=53591, nbCalls=13700, time=0.010s
+n=12, bestCost=67063, nbCalls=108505112, time=0.428s
+n=14, bestCost=77675, nbCalls=16926797486, time=73.113s
+```
+
 *Comparez ces temps d’exécution à ceux du programme utilisant un principe de programmation dynamique.*
 
 TODO: Répondre, faire le TD en question.
@@ -244,6 +250,10 @@ bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
 ```
 
 On peut alors effectuer des calculs sur des valeurs de `n` plus élevées :
+
+```shell
+Goal: n=14, nbCalls=97343
+```
 
 ```shell
 $ for i in 14 16 18 20 22 24; do ./bin/main $i; done
