@@ -153,12 +153,12 @@ bool hasCrossingEdges(
     int newVertex, 
     int** cost
 ) {
-    if (nbVisited <= 3) {
-        return false; // no crossing edges with 3 vertices or less
-    }
     /* check each edge before the last one
     that adding the edge (Ⓛ->Ⓝ) would not create a crossing edge
     with previously visited edges (⓪->①)
+    
+    WARN: No need for a precheck, this is done directly by the 
+    loop bounds
     */
     for (int i = 0; i < nbVisited - 1; i++) { // from first to last but one
     
