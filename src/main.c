@@ -245,6 +245,56 @@ int costPrimMST(
 
 /**
  * @brief Evaluation function (bound), that returns
+ * a lower bound of the cost of a path from the last
+ * visited vertex to the end of the tour (vertex 0),
+ * passing by all the remaining unvisited vertices.
+ * 
+ * This is the first version of the bound function,
+ * as described in part 5 of the subject.
+ * 
+ * TODO: debug
+*/
+int simple_bound(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    int sum = 0;
+    // get l, lenght of the smallest edge from the last 
+    // visited vertex to one of the remaining unvisited 
+    // vertices
+    int l = INT_MAX;
+    for (int i; i < nbNotVisited; i++) {
+        if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
+            l = cost[visited[nbVisited-1]][notVisited[i]];
+        }
+    }
+    sum += l;
+
+    // Now, for every remaining unvisited vertex, we determine
+    // l' the length of the smallest edge from this vertex to
+    // one of the remaining unvisited vertices, or to the end
+    // of the tour (vertex 0).
+    for (int i = 0; i < nbNotVisited; i++) {
+        int lPrime = INT_MAX;
+        // remaining unvisited vertices
+        for (int j = 0; j < nbNotVisited; j++) {
+            if (cost[notVisited[i]][notVisited[j]] < lPrime) {
+                lPrime = cost[notVisited[i]][notVisited[j]];
+            }
+        }
+        // vertex 0
+        if (cost[notVisited[i]][0] < lPrime) {
+            lPrime = cost[notVisited[i]][0];
+        }
+        sum += lPrime;
+    }
+
+    return sum;
+}
+
+/**
+ * @brief Evaluation function (bound), that returns
  * a lower bound of the cost of a path from the last 
  * visited vertex to the end of the tour (vertex 0), 
  * passing by all the remaining unvisited vertices.
@@ -300,12 +350,21 @@ void permutLoop(
     for (int i = 0; i < nbNotVisited; i++) {
         // constraint: no crossing edges
         // WARN: To be done FIRST, before adding notVisited[i] to visited
-        // if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
-        //     continue;
+        if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+            continue;
+
+        // constraint: bound
+        int boundedCost = costVisited + simple_bound(
+            visited, nbVisited, 
+            notVisited, nbNotVisited,
+            cost
+        );
+        if (boundedCost >= bestCost)
+            continue;
 
         // compute next cost
         // WARN: To be done BEFORE tweaking arrays
-        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
+        int costVisitedWithCurrent = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
 
         // add notVisited[i] to visited 
         // WARN: Need to be done BEFORE checking constraints
@@ -318,18 +377,9 @@ void permutLoop(
         notVisited[i] = notVisited[nbNotVisited-1];
         notVisited[nbNotVisited-1] = tmp;
         
-        // constraint: bound
-        // int boundedCost = nextCost + bound(
-        //     visited, nbVisited, 
-        //     notVisited, nbNotVisited,
-        //     cost
-        // );
-        // if (boundedCost > bestCost)
-        //     continue;
-
         // recursive call
         permut(
-            visited, nbVisited+1, nextCost,
+            visited, nbVisited+1, costVisitedWithCurrent,
             notVisited, nbNotVisited-1,
             cost    
         );
@@ -431,6 +481,7 @@ int main(int argc, char *argv[]) {
     
     permut(visited, 1, 0, notVisited, n-1, costMatrix);
 
+    // print results
     char * bestCostFormatted = formatNumber(bestCost);
     char * nbCallsFormatted = formatNumber(nbCalls);
     printf(

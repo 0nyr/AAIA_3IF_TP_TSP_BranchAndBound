@@ -267,18 +267,12 @@ Goal: n=14, nbCalls=97343
 
 ```shell
 $ for i in 14 16 18 20 22 24; do ./bin/main $i; done
-best cost: 69382
-n=14 nbCalls=151861 time=0.010s
-best cost: 70310
-n=16 nbCalls=978013 time=0.051s
-best cost: 75456
-n=18 nbCalls=6065015 time=0.341s
-best cost: 81292
-n=20 nbCalls=32165315 time=2.010s
-best cost: 82447
-n=22 nbCalls=174134399 time=11.980s
-best cost: 83193
-n=24 nbCalls=1032192967 time=77.010s
+n = 14; bestCost = 69,382; nbCalls = 97,343; time = 0.009s
+n = 16; bestCost = 70,310; nbCalls = 596,119; time = 0.043s
+n = 18; bestCost = 75,456; nbCalls = 3,767,726; time = 0.312s
+n = 20; bestCost = 81,292; nbCalls = 19,821,721; time = 1.861s
+n = 22; bestCost = 82,447; nbCalls = 107,963,329; time = 11.575s
+n = 24; bestCost = 83,193; nbCalls = 638,366,435; time = 78.131s
 ```
 
 ## Partie 5 : Implémentation de `bound` simple
@@ -341,6 +335,8 @@ On peut alors ajouter, dans la boucle `for` et après la vérification de non-cr
         if (boundedCost > bestCost)
             continue;
 ```
+
+> Attention à ne pas include `int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];` après le moment où l'on réorganise les tableaux, sinon forcément, il y a effet de bord et ça ne marche plus correctement.
 
 Cette amélioration nous permet de faire des calculs avec des valeurs de `n` toujours plus grand :
 
