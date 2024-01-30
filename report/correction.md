@@ -40,6 +40,14 @@ Ce TP vise à appliquer les principes théoriques de l'algorithme Branch & Bound
 
 Ce travail pratique offre ainsi une opportunité d'approfondissement dans le domaine de l'optimisation combinatoire et une expérience pratique significative dans la résolution d'un problème algorithmique classique.
 
+### A savoir avant de commencer
+
++ Avant de passer d'une partie à l'autre, il est **impératif** que les résultats obtenus soient **identiques** à ceux présentés dans le sujet. En cas de différence, **ne pas continuer** et trouver l'erreur.
++ Faire bien attention à l'ordre des opérations, surtout au moment d'ajouter du code dans une fonction d'une partie précédente.
++ Ne passez pas votre temps à modifier le template du TP. Passez directement à la lecture du sujet et à la programmation. La compréhension des fichiers externes tel que le `Makefile` n'est pas l'objectif du TP.
++ N'oublier pas de documenter vos réponses.
++ Essayer de respecter les principes du [Clean Code](https://github.com/JuanCrg90/Clean-Code-Notes) et veillez à la compréhensibilité de votre code, commentaires et notes.
+
 ## Partie 1 : compléter `permut`
 
 Soit `n` un entier naturel positif. On considère un graphe de `n` sommets tel que chacun de ses sommets est connecté à tous les autres (graphe complet). On cherche à calculer l'ensemble des circuits hamiltoniens, c'est-à-dire des chemins partant d'un sommet initial, passant par tous les sommets du graphe et retournant sur le sommet de départ. Ci-dessous, un exemple d'ensemble de chemins pour `n = 4`, avec `0` le sommet de départ. Les sommets sont représentés par des nombres, de `0` à `n - 1` :
@@ -185,9 +193,11 @@ n=4 nbCalls=16 time=0.000s
 ```
 
 ```shell
-n=8, bestCost=53591, nbCalls=13700, time=0.010s
-n=12, bestCost=67063, nbCalls=108505112, time=0.428s
-n=14, bestCost=77675, nbCalls=16926797486, time=73.113s
+$ for i in 8 10 12 14; do ./bin/main $i; done
+n = 8; bestCost = 53,591; nbCalls = 13,700; time = 0.000s
+n = 10; bestCost = 66,393; nbCalls = 986,410; time = 0.007s
+n = 12; bestCost = 67,063; nbCalls = 108,505,112; time = 0.430s
+n = 14; bestCost = 69,382; nbCalls = 16,926,797,486; time = 66.658s
 ```
 
 *Comparez ces temps d’exécution à ceux du programme utilisant un principe de programmation dynamique.*

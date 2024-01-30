@@ -299,8 +299,13 @@ void permutLoop(
 ) {
     for (int i = 0; i < nbNotVisited; i++) {
         // constraint: no crossing edges
-        if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
-            continue;
+        // WARN: To be done FIRST, before adding notVisited[i] to visited
+        // if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+        //     continue;
+
+        // compute next cost
+        // WARN: To be done BEFORE tweaking arrays
+        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
 
         // add notVisited[i] to visited 
         // WARN: Need to be done BEFORE checking constraints
@@ -314,7 +319,6 @@ void permutLoop(
         notVisited[nbNotVisited-1] = tmp;
         
         // constraint: bound
-        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
         // int boundedCost = nextCost + bound(
         //     visited, nbVisited, 
         //     notVisited, nbNotVisited,
@@ -426,13 +430,18 @@ int main(int argc, char *argv[]) {
         notVisited[i] = i+1;
     
     permut(visited, 1, 0, notVisited, n-1, costMatrix);
+
+    char * bestCostFormatted = formatNumber(bestCost);
+    char * nbCallsFormatted = formatNumber(nbCalls);
     printf(
-        "n=%d, bestCost=%d, nbCalls=%ld, time=%.3fs\n",
+        "n = %d; bestCost = %s; nbCalls = %s; time = %.3fs\n",
         n, 
-        bestCost,
-        nbCalls, 
+        bestCostFormatted,
+        nbCallsFormatted,
         ((double) (clock() - t)) / CLOCKS_PER_SEC
     );
+    free(bestCostFormatted);
+    free(nbCallsFormatted);
     
     // clean up
     if (generatePython)

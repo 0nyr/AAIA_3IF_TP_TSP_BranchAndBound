@@ -77,3 +77,27 @@ void printArray(int array[], int n) {
     }
     printf("%d]", array[n - 1]);
 }
+
+/**
+ * @brief Returns a string of a long decimal number
+ * where every 3 digits are separated by a space.
+*/
+char * formatNumber(long number) {
+    char *numberString = malloc(20 * sizeof(char));
+    sprintf(numberString, "%ld", number);
+    int length = strlen(numberString);
+    int numberOfSpaces = (length - 1) / 3;
+    char *formattedNumber = malloc((length + numberOfSpaces + 1) * sizeof(char));
+    int j = 0;
+    for (int i = 0; i < length; i++) {
+        if (i > 0 && (length - i) % 3 == 0) {
+            formattedNumber[j] = ',';
+            j++;
+        }
+        formattedNumber[j] = numberString[i];
+        j++;
+    }
+    formattedNumber[length + numberOfSpaces] = '\0';
+    free(numberString);
+    return formattedNumber;
+}
