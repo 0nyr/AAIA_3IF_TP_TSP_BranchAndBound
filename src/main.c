@@ -255,7 +255,7 @@ int costPrimMST(
  * TODO: debug
 */
 int simple_bound(
-    int visited[], int nbVisited, 
+    int lastVisited, 
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
@@ -265,8 +265,8 @@ int simple_bound(
     // vertices
     int l = INT_MAX;
     for (int i = 0; i < nbNotVisited; i++) {
-        if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
-            l = cost[visited[nbVisited-1]][notVisited[i]];
+        if (cost[lastVisited][notVisited[i]] < l) {
+            l = cost[lastVisited][notVisited[i]];
         }
     }
     sum += l;
@@ -372,8 +372,7 @@ void permutLoop(
 
         // constraint: bound
         int boundedCost = costVisitedWithCurrent + simple_bound(
-            visited, // modified with current notVisited[i]
-            nbVisited + 1, 
+            visited[nbVisited], // current vertex
             notVisited, 
             nbNotVisited - 1,
             cost
