@@ -101,3 +101,10 @@ char * formatNumber(long number) {
     free(numberString);
     return formattedNumber;
 }
+
+/**
+ * @brief Returns the minimum of two integers.
+*/
+int min(int a, int b) {
+    return a < b ? a : b;
+}

@@ -265,9 +265,7 @@ int simple_bound(
     // vertices
     int l = INT_MAX;
     for (int i = 0; i < nbNotVisited; i++) {
-        if (cost[lastVisited][notVisited[i]] < l) {
-            l = cost[lastVisited][notVisited[i]];
-        }
+        l = min(l, cost[lastVisited][notVisited[i]]);
     }
     sum += l;
 
@@ -281,9 +279,7 @@ int simple_bound(
         // remaining unvisited vertices
         for (int j = 0; j < nbNotVisited; j++) {
             if (j != i) { // don't include the current vertex
-                if (cost[notVisited[i]][notVisited[j]] < lPrime) {
-                    lPrime = cost[notVisited[i]][notVisited[j]];
-                }
+                lPrime = min(lPrime, cost[notVisited[i]][notVisited[j]]);
             }
         }
         // vertex 0
@@ -377,15 +373,16 @@ void permutLoop(
             nbNotVisited - 1,
             cost
         );
-        if (boundedCost >= bestCost)
-            continue;
-        
-        // recursive call
-        permut(
-            visited, nbVisited+1, costVisitedWithCurrent,
-            notVisited, nbNotVisited-1,
-            cost    
-        );
+        // WARN: do NOT use a continue statement here
+        // because we need to backtrack the changes of the arrays
+        if (boundedCost < bestCost) {
+            // recursive call
+            permut(
+                visited, nbVisited+1, costVisitedWithCurrent,
+                notVisited, nbNotVisited-1,
+                cost    
+            );
+        }
         
         // backtrack
         notVisited[nbNotVisited-1] = notVisited[i];

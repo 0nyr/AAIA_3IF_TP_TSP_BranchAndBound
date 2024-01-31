@@ -280,8 +280,19 @@ n = 24; bestCost = 83,193; nbCalls = 638,366,435; time = 78.131s
 On implémente la fonction `bound`, Cette fonction d’évaluation calcule une borne inférieure de la longueur du plus court chemin allant du dernier sommet visité jusqu’à 0 en passant par chaque sommet non visité exactement une fois.
 
 ```c
-int bound(
-    int visited[], int nbVisited, 
+/**
+ * @brief Evaluation function (bound), that returns
+ * a lower bound of the cost of a path from the last
+ * visited vertex to the end of the tour (vertex 0),
+ * passing by all the remaining unvisited vertices.
+ * 
+ * This is the first version of the bound function,
+ * as described in part 5 of the subject.
+ * 
+ * TODO: debug
+*/
+int simple_bound(
+    int lastVisited, 
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
@@ -290,10 +301,8 @@ int bound(
     // visited vertex to one of the remaining unvisited 
     // vertices
     int l = INT_MAX;
-    for (int i; i < nbNotVisited; i++) {
-        if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
-            l = cost[visited[nbVisited-1]][notVisited[i]];
-        }
+    for (int i = 0; i < nbNotVisited; i++) {
+        l = min(l, cost[lastVisited][notVisited[i]]);
     }
     sum += l;
 
@@ -301,12 +310,13 @@ int bound(
     // l' the length of the smallest edge from this vertex to
     // one of the remaining unvisited vertices, or to the end
     // of the tour (vertex 0).
+    // WARN: Don't include the current vertex itself.
     for (int i = 0; i < nbNotVisited; i++) {
         int lPrime = INT_MAX;
         // remaining unvisited vertices
         for (int j = 0; j < nbNotVisited; j++) {
-            if (cost[notVisited[i]][notVisited[j]] < lPrime) {
-                lPrime = cost[notVisited[i]][notVisited[j]];
+            if (j != i) { // don't include the current vertex
+                lPrime = min(lPrime, cost[notVisited[i]][notVisited[j]]);
             }
         }
         // vertex 0
@@ -332,11 +342,19 @@ On peut alors ajouter, dans la boucle `for` et après la vérification de non-cr
             notVisited, nbNotVisited,
             cost
         );
-        if (boundedCost > bestCost)
-            continue;
+        if (boundedCost < bestCost) {
+            // recursive call
+            permut(
+                visited, nbVisited+1, costVisitedWithCurrent,
+                notVisited, nbNotVisited-1,
+                cost  
+            );
+        }
 ```
 
 > Attention à ne pas include `int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];` après le moment où l'on réorganise les tableaux, sinon forcément, il y a effet de bord et ça ne marche plus correctement.
+
+> Attention de même avec l'utilisation de `continue` ! En effet, si la vérification de la borne est fait après la modification du tableau `notVisited`, alors faire un `continue` va *skip* le rétablisement du tableau ! Utiliser plutôt un `if` classique.
 
 Cette amélioration nous permet de faire des calculs avec des valeurs de `n` toujours plus grand :
 
@@ -508,7 +526,7 @@ void permutLoop(
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
-      
+    
         // constraint: bound
         int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
         int boundedCost = nextCost + bound(
@@ -535,7 +553,7 @@ void permutLoop(
             notVisited, nbNotVisited-1,
             cost  
         );
-      
+    
         // backtrack
         notVisited[nbNotVisited-1] = notVisited[i];
         notVisited[i] = tmp;
