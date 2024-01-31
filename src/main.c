@@ -264,7 +264,7 @@ int simple_bound(
     // visited vertex to one of the remaining unvisited 
     // vertices
     int l = INT_MAX;
-    for (int i; i < nbNotVisited; i++) {
+    for (int i = 0; i < nbNotVisited; i++) {
         if (cost[visited[nbVisited-1]][notVisited[i]] < l) {
             l = cost[visited[nbVisited-1]][notVisited[i]];
         }
@@ -275,12 +275,15 @@ int simple_bound(
     // l' the length of the smallest edge from this vertex to
     // one of the remaining unvisited vertices, or to the end
     // of the tour (vertex 0).
+    // WARN: Don't include the current vertex itself.
     for (int i = 0; i < nbNotVisited; i++) {
         int lPrime = INT_MAX;
         // remaining unvisited vertices
         for (int j = 0; j < nbNotVisited; j++) {
-            if (cost[notVisited[i]][notVisited[j]] < lPrime) {
-                lPrime = cost[notVisited[i]][notVisited[j]];
+            if (j != i) { // don't include the current vertex
+                if (cost[notVisited[i]][notVisited[j]] < lPrime) {
+                    lPrime = cost[notVisited[i]][notVisited[j]];
+                }
             }
         }
         // vertex 0
@@ -353,15 +356,6 @@ void permutLoop(
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
 
-        // constraint: bound
-        int boundedCost = costVisited + simple_bound(
-            visited, nbVisited, 
-            notVisited, nbNotVisited,
-            cost
-        );
-        if (boundedCost >= bestCost)
-            continue;
-
         // compute next cost
         // WARN: To be done BEFORE tweaking arrays
         int costVisitedWithCurrent = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
@@ -376,6 +370,17 @@ void permutLoop(
         int tmp = notVisited[i];
         notVisited[i] = notVisited[nbNotVisited-1];
         notVisited[nbNotVisited-1] = tmp;
+
+        // constraint: bound
+        int boundedCost = costVisitedWithCurrent + simple_bound(
+            visited, // modified with current notVisited[i]
+            nbVisited + 1, 
+            notVisited, 
+            nbNotVisited - 1,
+            cost
+        );
+        if (boundedCost >= bestCost)
+            continue;
         
         // recursive call
         permut(
