@@ -10,6 +10,7 @@
 #include "quicksort.h"
 #include "main.h" // WARN: Needed for functions used before they are defined like permut()
 
+int n = 0;         // Number of vertices
 int iseed = 1;     // Seed used to initialize the random number generator
 int** cost;        // cost[i][j] = cost[j][i] = cost of edge {i,j}
 long int nbCalls = 0; // Number of calls to the recursive permut function
@@ -181,7 +182,6 @@ bool hasCrossingEdges(
  * structure other than the number of vertices and the cost matrix.
 */
 int costPrimMST(
-    int baseGraphNbVertices,
     int vertices[], 
     int nbVertices, 
     int** cost
@@ -189,9 +189,9 @@ int costPrimMST(
     int s0 = vertices[0];
 
     // initializations
-    bool* isVisited = (bool*) malloc(baseGraphNbVertices*sizeof(bool));
-    int* minCostfrom = (int*) malloc(baseGraphNbVertices*sizeof(int));
-    int* predecesor = (int*) malloc(baseGraphNbVertices*sizeof(int));
+    bool* isVisited = (bool*) malloc(n * sizeof(bool));
+    int* minCostfrom = (int*) malloc(n * sizeof(int));
+    int* predecesor = (int*) malloc(n * sizeof(int));
     // for (int i = 0; i < baseGraphNbVertices; i++) {
     //     minCostfrom[i] = INT_MAX;
     //     predecesor[i] = -1;
@@ -299,7 +299,7 @@ int simple_bound(
  * passing by all the remaining unvisited vertices.
 */
 int bound(
-    int visited[], int nbVisited, 
+    int lastVisited, 
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
@@ -309,21 +309,16 @@ int bound(
     // vertices.
     // Same for lToZero, from any unvisited vertex to 0.
     int lFromLast, lToZero = INT_MAX;
-    for (int i; i < nbNotVisited; i++) {
-        if (cost[visited[nbVisited-1]][notVisited[i]] < lFromLast) {
-            lFromLast = cost[visited[nbVisited-1]][notVisited[i]];
-        }
-        if (cost[notVisited[i]][0] < lToZero) {
-            lToZero = cost[notVisited[i]][0];
-        }
+    for (int i = 0; i < nbNotVisited; i++) {
+        lFromLast = min(lFromLast, cost[lastVisited][notVisited[i]]);
+        lToZero = min(lToZero, cost[notVisited[i]][0]);
     }
     sum += lFromLast + lToZero;
 
     // Now, for every remaining unvisited vertex, we compute
     // the value of the minimum spanning tree (MST) of the
     // remaining unvisited vertices, and add it to the sum.
-    sum += costPrimMST(
-        nbNotVisited + nbVisited, // n 
+    sum += costPrimMST( 
         notVisited, nbNotVisited, cost
     );
 
@@ -367,7 +362,7 @@ void permutLoop(
         notVisited[nbNotVisited-1] = tmp;
 
         // constraint: bound
-        int boundedCost = costVisitedWithCurrent + simple_bound(
+        int boundedCost = costVisitedWithCurrent + bound(
             visited[nbVisited], // current vertex
             notVisited, 
             nbNotVisited - 1,
@@ -463,7 +458,7 @@ void permut(
 }
 
 int main(int argc, char *argv[]) {
-    int n = getInputNumberOfVertices(argc, argv);
+    n = getInputNumberOfVertices(argc, argv);
     generatePython = getGeneratePythonFlag(argc, argv);
     verbose = getVerboseFlag(argc, argv);
 

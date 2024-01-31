@@ -13,13 +13,12 @@ bool hasCrossingEdges(
     int** cost
 );
 int costPrimMST(
-    int baseGraphNbVertices,
     int vertices[], 
     int nbVertices, 
     int** cost
 );
 int bound(
-    int visited[], int nbVisited, 
+    int lastVisited, 
     int notVisited[], int nbNotVisited,
     int** cost
 );

@@ -42,6 +42,10 @@ Ce travail pratique offre ainsi une opportunité d'approfondissement dans le dom
 
 ### A savoir avant de commencer
 
+> "La première règle du Fight Club est : il est interdit de parler du Fight
+> Club. La deuxième règle du Fight Club est : il est interdit de parler
+> du Fight Club." [ref](https://fr.wikiquote.org/wiki/Fight_Club_(film)), [film](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+
 + Avant de passer d'une partie à l'autre, il est **impératif** que les résultats obtenus soient **identiques** à ceux présentés dans le sujet. En cas de différence, **ne pas continuer** et trouver l'erreur.
 + Faire bien attention à l'ordre des opérations, surtout au moment d'ajouter du code dans une fonction d'une partie précédente.
 + Ne passez pas votre temps à modifier le template du TP. Passez directement à la lecture du sujet et à la programmation. La compréhension des fichiers externes tel que le `Makefile` n'est pas l'objectif du TP.
@@ -360,12 +364,11 @@ Cette amélioration nous permet de faire des calculs avec des valeurs de `n` tou
 
 ```shell
 $ for i in 4 20 22 24 26 28; do ./bin/main $i; done
-n=4, bestCost=31319, nbCalls=8, time=0.000s
-n=20, bestCost=84729, nbCalls=819954, time=0.164s
-n=22, bestCost=85149, nbCalls=3507653, time=0.815s
-n=24, bestCost=84078, nbCalls=15779770, time=3.788s
-n=26, bestCost=88141, nbCalls=29627046, time=7.679s
-n=28, bestCost=89676, nbCalls=88340120, time=27.548s
+n = 20; bestCost = 81,292; nbCalls = 429,737; time = 0.176s
+n = 22; bestCost = 82,447; nbCalls = 2,003,996; time = 1.014s
+n = 24; bestCost = 83,193; nbCalls = 10,759,285; time = 5.836s
+n = 26; bestCost = 85,449; nbCalls = 20,492,536; time = 12.516s
+n = 28; bestCost = 87,005; nbCalls = 65,891,592; time = 49.869s
 ```
 
 ## Partie 6 : Implémentation d’une fonction `bound` plus sophistiquée
