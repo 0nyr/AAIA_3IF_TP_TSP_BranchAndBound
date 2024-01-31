@@ -361,7 +361,6 @@ void permutLoop(
         int costVisitedWithCurrent = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
 
         // add notVisited[i] to visited 
-        // WARN: Need to be done BEFORE checking constraints
         visited[nbVisited] = notVisited[i];
 
         // remove notVisited[i] from notVisited
@@ -414,7 +413,8 @@ void permut(
         if (generatePython)
             genPythonTurtleTour(visited, nbVisited);
 
-        // compute cost, don't forget to add the cost of the last edge
+        // compute cost, don't forget to add the cost of 
+        // the last edge (return to depot)
         costVisited += cost[visited[nbVisited-1]][0];
 
         if (verbose) {
@@ -423,7 +423,7 @@ void permut(
             for (int i = 0; i < nbVisited; i++) {
                 printf("%d, ", visited[i]);
             }
-            printf("0]");
+            printf("0]"); // return to depot
             printf(" cost: %d\n", costVisited);
         }
 
