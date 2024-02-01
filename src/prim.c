@@ -11,17 +11,15 @@
  * NOTE: Because the base graph is complete, no need to pass a 
  * structure other than the number of vertices and the cost matrix.
 */
-int costPrimMST(int vertices[], int nbVertices, int** cost) {
-    int n = nbVertices;
-    bool* isVisited = (bool*) malloc(n * sizeof(bool));
-    int* minCostfrom = (int*) malloc(n * sizeof(int));
-    int* predecesor = (int*) malloc(n * sizeof(int));
-
-    for (int v = 0; v < n; v++) {
-        minCostfrom[v] = INT_MAX;
-        predecesor[v] = -1;
-        isVisited[v] = false;
-    }
+int costPrimMST(
+    int vertices[], // subset of vertices
+    int nbVertices, // number of vertices in the subset
+    int nbAllVertices, // Number of vertices in the base graph
+    int** cost // cost matrix of the base graph
+) {
+    bool* isVisited = (bool*) malloc(nbAllVertices * sizeof(bool));
+    int* minCostfrom = (int*) malloc(nbAllVertices * sizeof(int));
+    int* predecesor = (int*) malloc(nbAllVertices * sizeof(int));
 
     // Assuming vertices[0] is the starting vertex
     int s0 = vertices[0];
@@ -30,17 +28,17 @@ int costPrimMST(int vertices[], int nbVertices, int** cost) {
     minCostfrom[s0] = 0;
     int nbVisited = 1;
 
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i < nbVertices; i++) {
         int v = vertices[i];
         isVisited[v] = false;
         predecesor[v] = s0;
         minCostfrom[v] = cost[v][s0];
     }
 
-    while (nbVisited < n) {
+    while (nbVisited < nbVertices) {
         int minCost = INT_MAX;
         int sMinCost = -1;
-        for (int i = 0; i < n; i++) {
+        for (int i = 1; i < nbVertices; i++) {
             int v = vertices[i];
             if (!isVisited[v] && minCostfrom[v] < minCost) {
                 minCost = minCostfrom[v];
@@ -51,7 +49,7 @@ int costPrimMST(int vertices[], int nbVertices, int** cost) {
         isVisited[sMinCost] = true;
         nbVisited++;
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 1; i < nbVertices; i++) {
             int v = vertices[i];
             if (!isVisited[v] && cost[sMinCost][v] < minCostfrom[v]) {
                 predecesor[v] = sMinCost;
@@ -61,7 +59,8 @@ int costPrimMST(int vertices[], int nbVertices, int** cost) {
     }
 
     int sum = 0;
-    for (int i = 0; i < n; i++) {
+    // WARN: don't add the cost of the starting vertex
+    for (int i = 1; i < nbVertices; i++) {
         sum += minCostfrom[i];
     }
 
@@ -127,7 +126,7 @@ void test_mst_cost(char * filename) {
     }
 
     // calculate MST cost
-    int mstCost = costPrimMST(vertices, n, cost);
+    int mstCost = costPrimMST(vertices, n, n, cost);
     printf("Calculated MST cost: %d\n", mstCost);
 
     if (mstCost == expectedMSTCost) {
@@ -153,4 +152,5 @@ void run_prim_cost_tests() {
     test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-14-20-09.txt");
     test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-15-01-59.txt");
     test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-15-02-04.txt");
+    test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-16-19-35.txt");
 }

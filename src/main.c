@@ -233,12 +233,19 @@ int bound(
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
+    if (nbNotVisited == 0) {
+        return 0;
+    }
+
     int sum = 0;
     // get l, lenght of the smallest edge from the last 
     // visited vertex to one of the remaining unvisited 
     // vertices.
     // Same for lToZero, from any unvisited vertex to 0.
-    int lFromLast, lToZero = INT_MAX;
+    // WARN: Doing int a, b = INT_MAX; would not work
+    // In C, a will stay uninitialized, but b will be!
+    int lFromLast = INT_MAX;
+    int lToZero = INT_MAX;
     for (int i = 0; i < nbNotVisited; i++) {
         lFromLast = min(lFromLast, cost[lastVisited][notVisited[i]]);
         lToZero = min(lToZero, cost[notVisited[i]][0]);
@@ -248,9 +255,24 @@ int bound(
     // Now, for every remaining unvisited vertex, we compute
     // the value of the minimum spanning tree (MST) of the
     // remaining unvisited vertices, and add it to the sum.
-    sum += costPrimMST( 
-        notVisited, nbNotVisited, cost
+    int costMst = costPrimMST( 
+        notVisited, nbNotVisited, n, cost
     );
+    sum += costMst;
+
+    // printf("bound: %d, best known: %d", sum, bestCost);
+    // printf("\t\t\t (notVisited: [");
+    // for (int i = 0; i < nbNotVisited - 1; i++) {
+    //     printf("%d, ", notVisited[i]);
+    // }
+    // printf("%d", notVisited[nbNotVisited - 1]);
+    // printf("] \t\t");
+    // printf("lastVisited: %d, ", lastVisited);
+    // printf("lFromLast: %d, ", lFromLast);
+    // printf("lToZero: %d, ", lToZero);
+    // printf("nbNotVisited: %d, ", nbNotVisited);
+    // printf("costMst: %d", costMst);
+    // printf(")\n");
 
     return sum;
 }
@@ -294,7 +316,7 @@ void permutLoop(
         // constraint: bound
         int boundedCost = costVisitedWithCurrent + bound(
             visited[nbVisited], // current vertex
-            notVisited, 
+            notVisited,
             nbNotVisited - 1,
             cost
         );
@@ -388,9 +410,9 @@ void permut(
 }
 
 int main(int argc, char *argv[]) {
-    // TDD: run tests
-    run_prim_cost_tests();
-    return 0;
+    // // TDD: run tests
+    // run_prim_cost_tests();
+    // return 0;
 
     n = getInputNumberOfVertices(argc, argv);
     generatePython = getGeneratePythonFlag(argc, argv);
@@ -400,6 +422,16 @@ int main(int argc, char *argv[]) {
         fd  = fopen("python/generated.py", "w");
     
     int** costMatrix = createCost(n);
+    if (verbose) {
+        printf("Cost matrix:\n");
+        for (int i = 0; i < n; i++) {
+            printf("[");
+            for (int j = 0; j < n; j++) {
+                printf("%d, ", costMatrix[i][j]);
+            }
+            printf("]\n");
+        }
+    }
 
     // initializations
     clock_t t = clock();
