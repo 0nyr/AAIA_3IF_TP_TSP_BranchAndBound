@@ -8,6 +8,7 @@
 
 #include "utils.h"
 #include "quicksort.h"
+#include "prim.h"
 #include "main.h" // WARN: Needed for functions used before they are defined like permut()
 
 int n = 0;         // Number of vertices
@@ -175,75 +176,6 @@ bool hasCrossingEdges(
 }
 
 /**
- * @brief Returns the cost of the Minimum Spanning Tree (MST)
- * of given vertices.
- * 
- * NOTE: Because the base graph is complete, no need to pass a 
- * structure other than the number of vertices and the cost matrix.
-*/
-int costPrimMST(
-    int vertices[], 
-    int nbVertices, 
-    int** cost
-) {
-    int s0 = vertices[0];
-
-    // initializations
-    bool* isVisited = (bool*) malloc(n * sizeof(bool));
-    int* minCostfrom = (int*) malloc(n * sizeof(int));
-    int* predecesor = (int*) malloc(n * sizeof(int));
-    // for (int i = 0; i < baseGraphNbVertices; i++) {
-    //     minCostfrom[i] = INT_MAX;
-    //     predecesor[i] = -1;
-    //     isVisited[i] = false;
-    // }
-    isVisited[s0] = true;
-    int nbVisited = 1;
-    for (int i = 1; i < nbVertices; i++) {
-        isVisited[vertices[i]] = false;
-        minCostfrom[vertices[i]] = cost[s0][vertices[i]];
-        predecesor[vertices[i]] = s0;
-    }
-
-    while (nbVisited < nbVertices) {
-        // get vertex with minimum cost
-        int minCost = INT_MAX;
-        int sMinCost;
-        for (int i = 1; i < nbVertices; i++) {
-            if (minCostfrom[vertices[i]] < minCost) {
-                minCost = minCostfrom[vertices[i]];
-                sMinCost = vertices[i];
-            }
-        }
-
-        isVisited[sMinCost] = true;
-        nbVisited++;
-
-        for(int i = 1; i < nbVertices; i++) {
-            if (isVisited[vertices[i]] == false &
-                cost[sMinCost][vertices[i]] < minCostfrom[vertices[i]]
-            ) {
-                predecesor[vertices[i]] = sMinCost;
-                minCostfrom[vertices[i]] = cost[sMinCost][vertices[i]];
-            }
-        }
-    }
-
-    // compute sum of costs (sum of all the predecesor arborescence's costs)
-    int sum = 0;
-    for (int i = 1; i < nbVertices; i++) {
-        sum += cost[predecesor[vertices[i]]][vertices[i]];
-    }
-
-    // clean up
-    free(isVisited);
-    free(minCostfrom);
-    free(predecesor);
-
-    return sum;
-}
-
-/**
  * @brief Evaluation function (bound), that returns
  * a lower bound of the cost of a path from the last
  * visited vertex to the end of the tour (vertex 0),
@@ -251,8 +183,6 @@ int costPrimMST(
  * 
  * This is the first version of the bound function,
  * as described in part 5 of the subject.
- * 
- * TODO: debug
 */
 int simple_bound(
     int lastVisited, 
@@ -458,6 +388,10 @@ void permut(
 }
 
 int main(int argc, char *argv[]) {
+    // TDD: run tests
+    run_prim_cost_tests();
+    return 0;
+
     n = getInputNumberOfVertices(argc, argv);
     generatePython = getGeneratePythonFlag(argc, argv);
     verbose = getVerboseFlag(argc, argv);
