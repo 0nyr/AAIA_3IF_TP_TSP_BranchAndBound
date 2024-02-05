@@ -9,6 +9,8 @@ monofont: 'JetBrainsMono Nerd Font'
 
 Florian Rascoussier, Janvier 2024
 
+Avec l'aide de Romain Fontaine
+
 ## Introduction
 
 Dans ce TP, nous nous intéresseront à un problème bien connu en Informatique, et à une famille d'algorithme non moins célèbre pour s'y attaquer.
@@ -44,7 +46,7 @@ Ce travail pratique offre ainsi une opportunité d'approfondissement dans le dom
 
 > "La première règle du Fight Club est : il est interdit de parler du Fight
 > Club. La deuxième règle du Fight Club est : il est interdit de parler
-> du Fight Club." [ref](https://fr.wikiquote.org/wiki/Fight_Club_(film)), [film](
+> du Fight Club." [ref](https://fr.wikiquote.org/wiki/Fight_Club_(film)), [film](https://youtu.be/dQw4w9WgXcQ?si=tj0D73HyWAFtNyZT)
 
 + Avant de passer d'une partie à l'autre, il est **impératif** que les résultats obtenus soient **identiques** à ceux présentés dans le sujet. En cas de différence, **ne pas continuer** et trouver l'erreur.
 + Faire bien attention à l'ordre des opérations, surtout au moment d'ajouter du code dans une fonction d'une partie précédente.
@@ -652,18 +654,14 @@ Ceci permet de trier le tableau de sommets `notVisited` en un tableau trié dans
 On obtient les résultats suivants :
 
 ```shell
-$ for i in 4 28 30 32 34 36 38 40 45 50 52; do ./bin/main $i; done
-n=4, bestCost=31319, nbCalls=6, time=0.000s
-n=28, bestCost=90552, nbCalls=11867, time=0.005s
-n=30, bestCost=104093, nbCalls=18834, time=0.011s
-n=32, bestCost=97563, nbCalls=1655, time=0.001s
-n=34, bestCost=98386, nbCalls=3540, time=0.002s
-n=36, bestCost=99110, nbCalls=8320, time=0.005s
-n=38, bestCost=111108, nbCalls=1384, time=0.001s
-n=40, bestCost=118817, nbCalls=1386, time=0.002s
-n=45, bestCost=127100, nbCalls=1392, time=0.002s
-n=50, bestCost=129422, nbCalls=138467, time=0.052s
-n=52, bestCost=130734, nbCalls=95488710, time=58.517s
+$ for i in 28 30 32 34 36 38 40; do ./bin/main $i; done
+n = 28; bestCost = 87,005; nbCalls = 5,268; time = 0.091s
+n = 30; bestCost = 89,288; nbCalls = 18,228; time = 0.205s
+n = 32; bestCost = 95,293; nbCalls = 58,312; time = 0.938s
+n = 34; bestCost = 96,116; nbCalls = 59,572; time = 1.143s
+n = 36; bestCost = 97,027; nbCalls = 95,642; time = 1.987s
+n = 38; bestCost = 102,757; nbCalls = 494,645; time = 11.930s
+n = 40; bestCost = 106,431; nbCalls = 1,394,961; time = 36.306s
 ```
 
-On observe que le mur de temps de calculs est maintenant atteint pour `n=52`, ce qui est une amélioration significative.
+On observe que le mur de temps de calculs est maintenant atteint pour `n=40`, ce qui est une amélioration significative.

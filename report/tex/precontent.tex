@@ -2,4 +2,65 @@
 % !TeX encoding = UTF-8
 
 % -- Introduction
-\section*{Introduction}
+\section*{Introduction}\label{introduction}
+
+Dans ce TP, nous nous intéresseront à un problème bien connu en Informatique, et à une famille d'algorithme non moins célèbre pour s'y attaquer.
+
+\subsection{Le Problème du Voyageur de Commerce
+(TSP)}\label{le-probluxe8me-du-voyageur-de-commerce-tsp}
+
+Le Travelling Salesman Problem (TSP) ou Problème du Voyageur de Commerce est un problème fondamental en optimisation combinatoire et en théorie des graphes.
+
+Le problème se formule de la manière suivante :
+
+\begin{quote}
+Étant donné une liste de villes et les distances entre chaque paire de villes, quel est le chemin le plus court possible qui visite chaque ville exactement une fois et revient à la ville d'origine ?
+\end{quote}
+
+Ce problème est notoire non seulement pour sa simplicité conceptuelle, mais aussi pour sa difficulté computationnelle, car il appartient à la classe des problèmes NP-complets. Cela signifie que, pour un grand nombre de villes, il est extrêmement difficile de calculer la solution exacte en un temps raisonnable. Le TSP a des applications pratiques dans de nombreux domaines tels que la planification d'itinéraires, la logistique et même la conception de circuits électroniques.
+
+\subsection{L'Algorithme Branch \&
+Bound}\label{lalgorithme-branch-bound}
+
+Parmi les stratégies algorithmiques développées pour traiter le TSP, l'algorithme Branch \& Bound se distingue par son efficacité. Cette méthode adopte une approche systématique pour examiner l'ensemble des solutions potentielles, tout en éliminant progressivement les options non viables. L'algorithme se décompose en deux étapes clés :
+
+\begin{itemize}
+\item
+  Branching (Branche) : Fractionnement du problème en sous-problèmes
+  plus petits.
+\item
+  Bounding (Limite) : Évaluation des limites inférieures et supérieures
+  des solutions possibles dans chaque sous-problème pour élaguer les
+  branches non prometteuses.
+\end{itemize}
+
+\subsection{Objectifs du TP}\label{objectifs-du-tp}
+
+Ce TP vise à appliquer les principes théoriques de l'algorithme Branch
+\& Bound à une instance concrète du TSP. À travers ce travail, les
+objectifs pédagogiques sont multiples :
+
+\begin{itemize}
+\item Explorer les défis inhérents à la résolution de problèmes NP-complets.
+\item Implémenter une stratégie d'optimisation avancée et analyser son efficacité.
+\item Évaluer les performances et les limites de l'algorithme Branch \& Bound dans le cadre spécifique du TSP.
+\end{itemize}
+
+Ce travail pratique offre ainsi une opportunité d'approfondissement dans le domaine de l'optimisation combinatoire et une expérience pratique significative dans la résolution d'un problème algorithmique classique.
+
+\subsection{A savoir avant de
+commencer}\label{a-savoir-avant-de-commencer}
+
+\begin{quote}
+La première règle du Fight Club est : il est interdit de parler du Fight Club. La deuxième règle du Fight Club est : il est interdit de parler du Fight Club. \href{https://fr.wikiquote.org/wiki/Fight_Club_(film)}{ref}, \href{https://youtu.be/dQw4w9WgXcQ?si=tj0D73HyWAFtNyZT}{Film complet}
+\end{quote}
+
+\begin{itemize}
+\item Avant de passer d'une partie à l'autre, il est \textbf{impératif} que les résultats obtenus soient \textbf{identiques} à ceux présentés dans le sujet. En cas de différence, \textbf{ne pas continuer} et trouver l'erreur.
+\item Faire bien attention à l'ordre des opérations, surtout au moment d'ajouter du code dans une fonction d'une partie précédente.
+\item Ne passez pas votre temps à modifier le template du TP. Passez directement à la lecture du sujet et à la programmation. La compréhension des fichiers externes tels que le \texttt{Makefile} n'est pas l'objectif du TP.
+\item
+  N'oublier pas de documenter vos réponses.
+\item
+  Essayer de respecter les principes du \href{https://github.com/JuanCrg90/Clean-Code-Notes}{Clean Code} et veillez à la compréhensibilité de votre code, commentaires et notes.
+\end{itemize}

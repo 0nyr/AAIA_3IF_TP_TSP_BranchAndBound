@@ -264,21 +264,6 @@ int bound(
     );
     sum += costMst;
 
-    // printf("bound: %d, best known: %d", sum, bestCost);
-    // printf(" (notVisited: [");
-    // for (int i = 0; i < nbNotVisited - 1; i++) {
-    //     printf("%d, ", notVisited[i]);
-    // }
-    // printf("%d", notVisited[nbNotVisited - 1]);
-    // printf("] ");
-    // printf("lastVisited: %d, ", lastVisited);
-    // printf("lFromLast: %d, ", lFromLast);
-    // printf("lToZero: %d, ", lToZero);
-    // printf("nbNotVisited: %d, ", nbNotVisited);
-    // printf("n: %d, ", n);
-    // printf("costMst: %d", costMst);
-    // printf(")\n");
-
     return sum;
 }
 
@@ -385,40 +370,36 @@ void permut(
     // wrt cost of edge from last visited vertex
 
     // make copies of arrays before sorting in place
-    // int* costsFromLastVisited = (int*) malloc(nbNotVisited*sizeof(int));
-    // for (int i = 0; i < nbNotVisited; i++) {
-    //     costsFromLastVisited[i] = cost[visited[nbVisited-1]][notVisited[i]];
-    // }
-    // int* notVisitedIncrOrder = (int*) malloc(nbNotVisited*sizeof(int));
-    // for (int i = 0; i < nbNotVisited; i++) {
-    //     notVisitedIncrOrder[i] = notVisited[i];
-    // }
+    int* costsFromLastVisited = (int*) malloc(nbNotVisited*sizeof(int));
+    for (int i = 0; i < nbNotVisited; i++) {
+        costsFromLastVisited[i] = cost[visited[nbVisited-1]][notVisited[i]];
+    }
+    int* notVisitedIncrOrder = (int*) malloc(nbNotVisited*sizeof(int));
+    for (int i = 0; i < nbNotVisited; i++) {
+        notVisitedIncrOrder[i] = notVisited[i];
+    }
 
-    // quicksortInPlace(
-    //     notVisitedIncrOrder, 
-    //     0, // index of first element
-    //     nbNotVisited - 1, // WARN: index of last element, not number of elements
-    //     costsFromLastVisited
-    // );
+    quicksortInPlace(
+        notVisitedIncrOrder, 
+        0, // index of first element
+        nbNotVisited - 1, // WARN: index of last element, not number of elements
+        costsFromLastVisited
+    );
 
     // recursive call, with reordered notVisited array
     permutLoop(
         visited, nbVisited, costVisited,
-        //notVisitedIncrOrder, nbNotVisited,
-        notVisited, nbNotVisited,
+        notVisitedIncrOrder, nbNotVisited,
+        //notVisited, nbNotVisited,
         cost
     );
 
     // clean up
-    // free(costsFromLastVisited);
-    // free(notVisitedIncrOrder);
+    free(costsFromLastVisited);
+    free(notVisitedIncrOrder);
 }
 
 int main(int argc, char *argv[]) {
-    // // TDD: run tests
-    // run_prim_cost_tests();
-    // return 0;
-
     n = getInputNumberOfVertices(argc, argv);
     generatePython = getGeneratePythonFlag(argc, argv);
     verbose = getVerboseFlag(argc, argv);

@@ -2,3 +2,158 @@
 % !TeX encoding = UTF-8
 
 % -- Exercice 1
+\section{\texorpdfstring{Partie 1 : compléter
+\texttt{permut}}{Partie 1 : compléter permut}}\label{partie-1-compluxe9ter-permut}
+
+Soit \texttt{n} un entier naturel positif. On considère un graphe de \texttt{n} sommets tel que chacun de ses sommets est connecté à tous les autres (graphe complet). On cherche à calculer l'ensemble des circuits
+hamiltoniens, c'est-à-dire des chemins partant d'un sommet initial, passant par tous les sommets du graphe et retournant sur le sommet de départ. Ci-dessous, un exemple d'ensemble de chemins pour \texttt{n\ =\ 4}, avec \texttt{0} le sommet de départ. Les sommets sont représentés par des nombres, de \texttt{0} à \texttt{n - 1} :
+
+\begin{lstlisting}[language=bash, caption={Ensemble de permutations possible d'un chemin hamiltonien pour $n = 4$}]
+    [0, 1, 3, 2, 0] 
+    [0, 1, 2, 3, 0]
+    [0, 2, 1, 3, 0]
+    [0, 2, 3, 1, 0]
+    [0, 3, 1, 2, 0]
+    [0, 3, 2, 1, 0]
+\end{lstlisting}
+
+Par définition, chaque chemin hamiltonien commence et se termine par $0$. Naturellement, calculer l'ensemble de ces chemins revient donc à calculer l'ensemble des permutations de l'ensemble $\{e \mid e \in [1, \ldots, n - 1]\}$. Or, le nombre de permutations d'un ensemble fini non vide à $k$ éléments est $n!$ (voir \href{https://www.lelivrescolaire.fr/page/12761882}{cours}). Donc pour un graphe de $n$ nœuds, on cherche ses $(n - 1)!$ permutations de chemins hamiltonien au départ du nœud $0$.
+
+L'algorithme \texttt{permut} calcule l'ensemble des permutations de chemins possible. Ci-dessous, une solution possible d'implémentation :
+
+\begin{lstlisting}[language=c, caption={Implémentation de l'algorithme \texttt{permut}}]
+/**
+* @brief Loop inside the recursive function that computes all 
+* the permutations of the vertices of the graph.
+* 
+* @param visited Array of visited vertices
+* @param nbVisited Number of visited vertices
+* @param costVisited Cost of the visited vertices
+* @param notVisited Array of unvisited vertices
+* @param nbNotVisited Number of unvisited vertices
+* @param cost Cost matrix
+*/
+void permut(int visited[], int nbVisited, int notVisited[], int nbNotVisited) {
+    nbCalls++;
+    if (nbNotVisited == 0) {
+        genTurtleTour(visited, nbVisited);
+
+        // log in terminal
+        for (int i = 0; i < nbVisited; i++) {
+            printf("%d ", visited[i]);
+        }
+        printf("0\n");
+    }
+    for (int i = 0; i < nbNotVisited; i++) {
+        // add notVisited[i] to visited
+        visited[nbVisited] = notVisited[i];
+
+        // remove notVisited[i] from notVisited
+        // we need to swap notVisited[i] with notVisited[nbNotVisited-1] for 
+        // easy restoration of the array after the recursive call
+        int tmp = notVisited[i];
+        notVisited[i] = notVisited[nbNotVisited-1];
+        notVisited[nbNotVisited-1] = tmp;
+
+        // recursive call
+        permut(visited, nbVisited+1, notVisited, nbNotVisited-1);
+    
+        // backtrack
+        notVisited[nbNotVisited-1] = notVisited[i];
+        notVisited[i] = tmp;
+    }
+}
+\end{lstlisting}
+
+Une fois la fonction \texttt{permut} complétée, on peut alors exécuter le programme. Exemple pour $n = 4$ :
+
+\begin{lstlisting}[language=bash, caption={Exécution de l'algorithme \texttt{permut} pour $n = 4$}]
+    ./bin/main 4
+    0 1 3 2 0
+    0 1 2 3 0
+    0 2 1 3 0
+    0 2 3 1 0
+    0 3 1 2 0
+    0 3 2 1 0
+    n=4 nbCalls=16 time=0.000s
+\end{lstlisting}
+
+\section{Partie 2: calcul de longueur des circuits hamiltoniens}
+
+Dans cette étape, on modifie la fonction \texttt{createCost} pour qu'elle renvoie un \texttt{int**}, la matrice des coûts.
+
+On peut alors fournir cette matrice à \texttt{permut} en modifiant ses paramètres. On ajoute alors dans la \textit{scope} du \texttt{if} de cette fonction, le code suivant :
+
+\begin{lstlisting}[language=c, caption={Ajout de la matrice des coûts dans la fonction \texttt{permut}}]
+    // compute and display cost
+    int totalCost = 0;
+    for (int i = 0; i < nbVisited-1; i++) {
+        totalCost += cost[visited[i]][visited[i+1]];
+    }
+    totalCost += cost[visited[nbVisited-1]][visited[0]];
+    printf(" cost: %d\n", totalCost);
+\end{lstlisting}
+
+Ce code permet de calculer et d'afficher la valeur du chemin. On obtient par exemple, pour $n = 4$ :
+
+\begin{lstlisting}[language=bash, caption={Exécution de l'algorithme \texttt{permut} pour $n = 4$ avec calcul de la longueur}]
+    [0, 1, 3, 2, 0] cost: 31319
+    [0, 1, 2, 3, 0] cost: 32786
+    [0, 2, 1, 3, 0] cost: 34415
+    [0, 2, 3, 1, 0] cost: 31319
+    [0, 3, 1, 2, 0] cost: 34415
+    [0, 3, 2, 1, 0] cost: 32786
+    n=4 nbCalls=16 time=0.000s
+\end{lstlisting}
+
+\section{Partie 3: Recherche du plus court-circuit hamiltonien}
+
+On ajoute une variable globale :
+
+\begin{lstlisting}[language=c, caption={Ajout d'une variable globale pour stocker le coût minimum}]
+    int bestCost = INT_MAX; // Best cost found so far
+\end{lstlisting}
+
+On modifie ensuite la fonction \texttt{permut} pour qu'elle puisse tenir la variable \texttt{bestCost} à jour.
+
+\begin{lstlisting}[language=c, caption={Mise à jour de la variable \texttt{bestCost} dans la fonction \texttt{permut}}]
+    void permut(
+        int visited[], int nbVisited, 
+        int notVisited[], int nbNotVisited,
+        int** cost
+    ) {
+        if (nbNotVisited == 0) {
+            [...]
+    
+            // update best cost
+            if (totalCost < bestCost) {
+                bestCost = totalCost;
+            }
+        }
+        [...]
+    }
+\end{lstlisting}
+
+Cette modification simple permet de maintenir à jour la valeur du meilleur coût rencontré. On obtient par exemple, pour $n = 4$ :
+
+\begin{lstlisting}[language=bash, caption={Exécution de l'algorithme \texttt{permut} pour $n = 4$ avec calcul de la longueur et recherche du plus court chemin}]
+    $ ./bin/main 4 -g
+    [0, 1, 3, 2, 0] cost: 31319
+    [0, 1, 2, 3, 0] cost: 32786
+    [0, 2, 1, 3, 0] cost: 34415
+    [0, 2, 3, 1, 0] cost: 31319
+    [0, 3, 1, 2, 0] cost: 34415
+    [0, 3, 2, 1, 0] cost: 32786
+    best cost: 31319
+    n=4 nbCalls=16 time=0.000s
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption={Exécution de l'algorithme \texttt{permut} pour différentes valeurs de $n$.}]
+    $ for i in 8 10 12 14; do ./bin/main $i; done
+    n = 8; bestCost = 53,591; nbCalls = 13,700; time = 0.000s
+    n = 10; bestCost = 66,393; nbCalls = 986,410; time = 0.007s
+    n = 12; bestCost = 67,063; nbCalls = 108,505,112; time = 0.430s
+    n = 14; bestCost = 69,382; nbCalls = 16,926,797,486; time = 66.658s
+\end{lstlisting}
+
+\section{Partie 4: Propagation de contraintes}
