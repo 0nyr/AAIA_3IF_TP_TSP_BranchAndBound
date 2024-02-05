@@ -1,8 +1,13 @@
+/**
+ * This file including the test cases have been generated
+ * using a custom program. See below:
+ * https://github.com/0nyr/prim_algorithm
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <stdbool.h>
-
 
 /**
  * @brief Returns the cost of the Minimum Spanning Tree (MST)
@@ -60,6 +65,10 @@ int costPrimMST(
 
     int sum = 0;
     // WARN: don't add the cost of the starting vertex
+    // WARN: don't do minCostfrom[i], do minCostfrom[vertices[i]]. 
+    // This is a terrible mistake that cost me a lot of time.
+    // It doesn't get detected by the tests since the test are on 
+    // all base graph nodes.
     for (int i = 1; i < nbVertices; i++) {
         sum += minCostfrom[i];
     }
@@ -107,26 +116,32 @@ void test_mst_cost(char * filename) {
         }
     }
 
+    int nbNodesNotInMSTfromBaseGraph = 0;
+    if (fscanf(file, "%d", &nbNodesNotInMSTfromBaseGraph) != 1) {
+        printf("Error reading the number of nodes not in the MST from the file.\n");
+    }
+
     int expectedMSTCost;
     if (fscanf(file, "%d", &expectedMSTCost) != 1) {
         printf("Error reading the expected MST cost from the file.\n");
-        // Free allocated memory and close the file before returning
-        for (int i = 0; i < n; i++) {
-            free(cost[i]);
-        }
-        free(cost);
-        fclose(file);
-        return;
     }
 
-    // initialize vertices
+    // determine the number of vertices in the MST
+    int nbVerticesInMST;
+    if (nbNodesNotInMSTfromBaseGraph > 0) {
+        nbVerticesInMST = n - nbNodesNotInMSTfromBaseGraph;
+    } else {
+        nbVerticesInMST = n;
+    }
+
+    // initialize vertices for the MST
     int* vertices = (int*)malloc(n * sizeof(int));
-    for (int i = 0; i < n; i++) {
-        vertices[i] = i; // Assume vertices are labeled 0 to n-1
+    for (int i = 0; i < nbVerticesInMST; i++) {
+        vertices[i] = i;
     }
 
     // calculate MST cost
-    int mstCost = costPrimMST(vertices, n, n, cost);
+    int mstCost = costPrimMST(vertices, nbVerticesInMST, n, cost);
     printf("Calculated MST cost: %d\n", mstCost);
 
     if (mstCost == expectedMSTCost) {
@@ -144,13 +159,27 @@ void test_mst_cost(char * filename) {
 }
 
 /**
- * @brief Runs the tests for the costPrimMST function.
- * Call this function from main.c to run the tests.
+ * @brief Runs the tests for the costPrimMST function, using the complete MSTs
 */
-void run_prim_cost_tests() {
-    test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-14-17-51.txt");
-    test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-14-20-09.txt");
-    test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-15-01-59.txt");
-    test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-15-02-04.txt");
-    test_mst_cost("test_graphs/fully_connected_graph_2024-02-01-16-19-35.txt");
+void run_prim_cost_tests_on_full_mst() {
+    test_mst_cost("test_graphs/complete_mst/fully_connected_graph_complete_mst_2024-02-05-09-02-10.txt");
+    test_mst_cost("test_graphs/complete_mst/fully_connected_graph_complete_mst_2024-02-05-09-02-17.txt");
+    test_mst_cost("test_graphs/complete_mst/fully_connected_graph_complete_mst_2024-02-05-09-02-22.txt");
+}
+
+/**
+ * @brief Runs the tests for the costPrimMST function, using the partial MSTs
+*/
+void run_prim_cost_test_on_partial_mst() {
+    test_mst_cost("test_graphs/partial_mst/fully_connected_graph_partial_mst__2024-02-02-11-28-22.txt");
+    test_mst_cost("test_graphs/partial_mst/fully_connected_graph_partial_mst__2024-02-02-11-29-56.txt");
+    test_mst_cost("test_graphs/partial_mst/fully_connected_graph_partial_mst__2024-02-02-11-30-03.txt");
+}
+
+/**
+ * @brief Runs all the tests for the costPrimMST function
+*/
+void run_all_prim_cost_tests() {
+    run_prim_cost_tests_on_full_mst();
+    run_prim_cost_test_on_partial_mst();
 }

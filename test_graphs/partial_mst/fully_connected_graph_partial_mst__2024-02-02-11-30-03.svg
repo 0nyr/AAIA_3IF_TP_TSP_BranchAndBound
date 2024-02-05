@@ -1,0 +1,146 @@
+<svg height="440" width="440" xmlns="http://www.w3.org/2000/svg">
+<line stroke="black" x1="200" x2="200" y1="300" y2="280"/>
+<text fill="grey" font-family="Arial" font-size="10" x="205" y="295">
+1
+</text>
+<line stroke="black" x1="240" x2="280" y1="400" y2="400"/>
+<text fill="grey" font-family="Arial" font-size="10" x="265" y="405">
+2
+</text>
+<line stroke="black" x1="140" x2="140" y1="320" y2="260"/>
+<text fill="grey" font-family="Arial" font-size="10" x="145" y="295">
+3
+</text>
+<line stroke="black" x1="140" x2="200" y1="260" y2="280"/>
+<text fill="grey" font-family="Arial" font-size="10" x="175" y="275">
+3
+</text>
+<line stroke="black" x1="260" x2="320" y1="220" y2="240"/>
+<text fill="grey" font-family="Arial" font-size="10" x="295" y="235">
+3
+</text>
+<line stroke="black" x1="300" x2="320" y1="180" y2="240"/>
+<text fill="grey" font-family="Arial" font-size="10" x="315" y="215">
+3
+</text>
+<line stroke="black" x1="120" x2="120" y1="120" y2="180"/>
+<text fill="grey" font-family="Arial" font-size="10" x="125" y="155">
+3
+</text>
+<line stroke="black" x1="80" x2="120" y1="220" y2="180"/>
+<text fill="grey" font-family="Arial" font-size="10" x="105" y="205">
+3
+</text>
+<line stroke="black" x1="40" x2="80" y1="20" y2="60"/>
+<text fill="grey" font-family="Arial" font-size="10" x="65" y="45">
+3
+</text>
+<line stroke="black" x1="200" x2="200" y1="300" y2="360"/>
+<text fill="grey" font-family="Arial" font-size="10" x="205" y="335">
+3
+</text>
+<line stroke="black" x1="240" x2="200" y1="400" y2="360"/>
+<text fill="grey" font-family="Arial" font-size="10" x="225" y="385">
+3
+</text>
+<line stroke="black" x1="320" x2="360" y1="240" y2="320"/>
+<text fill="grey" font-family="Arial" font-size="10" x="345" y="285">
+4
+</text>
+<line stroke="black" x1="260" x2="200" y1="220" y2="280"/>
+<text fill="grey" font-family="Arial" font-size="10" x="235" y="255">
+4
+</text>
+<line stroke="black" x1="80" x2="140" y1="220" y2="260"/>
+<text fill="grey" font-family="Arial" font-size="10" x="115" y="245">
+4
+</text>
+<line stroke="black" x1="120" x2="200" y1="120" y2="120"/>
+<text fill="grey" font-family="Arial" font-size="10" x="165" y="125">
+4
+</text>
+<line stroke="black" x1="120" x2="80" y1="120" y2="60"/>
+<text fill="grey" font-family="Arial" font-size="10" x="105" y="95">
+4
+</text>
+<circle cx="80" cy="220" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="76" y="224">
+0
+</text>
+<circle cx="40" cy="20" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="36" y="24">
+1
+</text>
+<circle cx="300" cy="180" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="296" y="184">
+2
+</text>
+<circle cx="140" cy="320" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="136" y="324">
+3
+</text>
+<circle cx="240" cy="400" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="236" y="404">
+4
+</text>
+<circle cx="200" cy="300" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="196" y="304">
+5
+</text>
+<circle cx="120" cy="120" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="116" y="124">
+6
+</text>
+<circle cx="140" cy="260" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="136" y="264">
+7
+</text>
+<circle cx="80" cy="60" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="76" y="64">
+8
+</text>
+<circle cx="260" cy="220" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="256" y="224">
+9
+</text>
+<circle cx="280" cy="400" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="276" y="404">
+10
+</text>
+<circle cx="320" cy="240" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="316" y="244">
+11
+</text>
+<circle cx="200" cy="360" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="196" y="364">
+12
+</text>
+<circle cx="200" cy="120" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="196" y="124">
+13
+</text>
+<circle cx="200" cy="280" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="196" y="284">
+14
+</text>
+<circle cx="120" cy="180" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="116" y="184">
+15
+</text>
+<circle cx="360" cy="320" fill="red" r="8"/>
+<text fill="white" font-family="Arial" font-size="10" x="356" y="324">
+16
+</text>
+<circle cx="100" cy="360" fill="yellow" r="8"/>
+<text fill="red" font-family="Arial" font-size="10" x="96" y="364">
+17
+</text>
+<circle cx="220" cy="60" fill="yellow" r="8"/>
+<text fill="red" font-family="Arial" font-size="10" x="216" y="64">
+18
+</text>
+<circle cx="340" cy="220" fill="yellow" r="8"/>
+<text fill="red" font-family="Arial" font-size="10" x="336" y="224">
+19
+</text>
+</svg>

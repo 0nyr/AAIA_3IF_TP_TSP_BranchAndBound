@@ -22,7 +22,7 @@ Notes about local LaTeX editing and  compiling.
 
 [LTex extension settings | doc](https://valentjn.github.io/ltex/settings.html)
 
-Look inside `.vscode/settings.json` for extension language setting. 
+Look inside `.vscode/settings.json` for extension language setting.
 
 > WARN: Only one language can be used for a given file at a time.
 

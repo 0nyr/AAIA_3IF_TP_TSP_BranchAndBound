@@ -10,5 +10,6 @@ X X X X X // cost matrix
 X X X X X
 X X X X X
 X X X X x
+nbNodesNotInMSTfromBaseGraph // nb of nodes (with greatest index) not to be included in the MST
 expectedMSTcost // computed cost of the MST from the 
 ```

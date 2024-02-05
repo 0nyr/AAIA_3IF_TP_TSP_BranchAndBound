@@ -44,7 +44,7 @@ Ce travail pratique offre ainsi une opportunité d'approfondissement dans le dom
 
 > "La première règle du Fight Club est : il est interdit de parler du Fight
 > Club. La deuxième règle du Fight Club est : il est interdit de parler
-> du Fight Club." [ref](https://fr.wikiquote.org/wiki/Fight_Club_(film)), [film](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+> du Fight Club." [ref](https://fr.wikiquote.org/wiki/Fight_Club_(film)), [film](
 
 + Avant de passer d'une partie à l'autre, il est **impératif** que les résultats obtenus soient **identiques** à ceux présentés dans le sujet. En cas de différence, **ne pas continuer** et trouver l'erreur.
 + Faire bien attention à l'ordre des opérations, surtout au moment d'ajouter du code dans une fonction d'une partie précédente.

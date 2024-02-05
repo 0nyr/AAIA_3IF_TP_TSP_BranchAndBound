@@ -417,6 +417,12 @@ int main(int argc, char *argv[]) {
     n = getInputNumberOfVertices(argc, argv);
     generatePython = getGeneratePythonFlag(argc, argv);
     verbose = getVerboseFlag(argc, argv);
+    bool run_tests = getRunTestsFlag(argc, argv);
+
+    if (run_tests) {
+        run_all_prim_cost_tests();
+        return 0;
+    }
 
     if (generatePython)
         fd  = fopen("python/generated.py", "w");

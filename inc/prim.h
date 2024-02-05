@@ -7,6 +7,6 @@ int costPrimMST(
     int nbAllVertices, // Number of vertices in the base graph
     int** cost // cost matrix of the base graph
 );
-void run_prim_cost_tests();
+void run_all_prim_cost_tests();
 
 #endif // PRIM_H

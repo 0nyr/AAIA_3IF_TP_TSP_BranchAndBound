@@ -56,6 +56,22 @@ bool getGeneratePythonFlag(int argc, char *argv[]) {
 }
 
 /**
+ * @brief Returns true if the "run tests(-t)" option is given,
+ * or false otherwise.
+*/
+bool getRunTestsFlag(int argc, char *argv[]) {
+    bool runTests = false;
+    if (argc >= 3) {
+        for (int i = 2; i < argc; i++) {
+            if (strcmp(argv[i], "-t") == 0) {
+                runTests = true;
+            }
+        }
+    }
+    return runTests;
+}
+
+/**
  * @brief Returns true if the "verbose(-v)" option is given,
  * or false otherwise.
 */
