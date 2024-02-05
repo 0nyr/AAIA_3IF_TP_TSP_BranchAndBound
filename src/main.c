@@ -189,6 +189,10 @@ int simple_bound(
     int notVisited[], int nbNotVisited,
     int** cost
 ) {
+    if (nbNotVisited == 0) {
+        return 0;
+    }
+
     int sum = 0;
     // get l, lenght of the smallest edge from the last 
     // visited vertex to one of the remaining unvisited 
@@ -261,16 +265,17 @@ int bound(
     sum += costMst;
 
     // printf("bound: %d, best known: %d", sum, bestCost);
-    // printf("\t\t\t (notVisited: [");
+    // printf(" (notVisited: [");
     // for (int i = 0; i < nbNotVisited - 1; i++) {
     //     printf("%d, ", notVisited[i]);
     // }
     // printf("%d", notVisited[nbNotVisited - 1]);
-    // printf("] \t\t");
+    // printf("] ");
     // printf("lastVisited: %d, ", lastVisited);
     // printf("lFromLast: %d, ", lFromLast);
     // printf("lToZero: %d, ", lToZero);
     // printf("nbNotVisited: %d, ", nbNotVisited);
+    // printf("n: %d, ", n);
     // printf("costMst: %d", costMst);
     // printf(")\n");
 

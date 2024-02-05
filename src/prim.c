@@ -70,7 +70,7 @@ int costPrimMST(
     // It doesn't get detected by the tests since the test are on 
     // all base graph nodes.
     for (int i = 1; i < nbVertices; i++) {
-        sum += minCostfrom[i];
+        sum += minCostfrom[vertices[i]];
     }
 
     free(isVisited);

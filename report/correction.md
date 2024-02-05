@@ -380,62 +380,66 @@ On peut améliorer la fonction `bound` précédente en calculant une meilleure a
 Voici l'implémentation de l'algorithme de Prim, pour notre situation. On note que l'on n'a pas besoin de maintenir l'ensemble E des arcs de l'arbre couvrant minimum, puisqu'on ne s'intéresse qu'à la longueur de l'arborescence (MST) construite par l'algorithme. On notera aussi qu'on n'a pas besoin de passer la structure du graphe de base, puisque celui-ci est complet. Il faut néanmoins passer en paramètre de la fonction le nombre de nœuds du graphe de base malgré qu'on soit en train de calculer le MST du sous-graphe des nœuds non visités, afin de pouvoir initialiser la taille des tableaux correctement.
 
 ```c
+/**
+ * @brief Returns the cost of the Minimum Spanning Tree (MST)
+ * of given vertices.
+ * 
+ * NOTE: Because the base graph is complete, no need to pass a 
+ * structure other than the number of vertices and the cost matrix.
+*/
 int costPrimMST(
-    int baseGraphNbVertices,
-    int vertices[], 
-    int nbVertices, 
-    int** cost
+    int vertices[], // subset of vertices
+    int nbVertices, // number of vertices in the subset
+    int nbAllVertices, // Number of vertices in the base graph
+    int** cost // cost matrix of the base graph
 ) {
-    int s0 = vertices[0];
+    bool* isVisited = (bool*) malloc(nbAllVertices * sizeof(bool));
+    int* minCostfrom = (int*) malloc(nbAllVertices * sizeof(int));
+    int* predecesor = (int*) malloc(nbAllVertices * sizeof(int));
 
-    // initializations
-    bool* isVisited = (bool*) malloc(baseGraphNbVertices*sizeof(bool));
-    int* minCostfrom = (int*) malloc(baseGraphNbVertices*sizeof(int));
-    int* predecesor = (int*) malloc(baseGraphNbVertices*sizeof(int));
-    // for (int i = 0; i < baseGraphNbVertices; i++) {
-    //     minCostfrom[i] = INT_MAX;
-    //     predecesor[i] = -1;
-    //     isVisited[i] = false;
-    // }
+    // Assuming vertices[0] is the starting vertex
+    int s0 = vertices[0];
     isVisited[s0] = true;
+    predecesor[s0] = -1;
+    minCostfrom[s0] = 0;
     int nbVisited = 1;
+
     for (int i = 1; i < nbVertices; i++) {
-        isVisited[vertices[i]] = false;
-        minCostfrom[vertices[i]] = cost[s0][vertices[i]];
-        predecesor[vertices[i]] = s0;
+        int v = vertices[i];
+        isVisited[v] = false;
+        predecesor[v] = s0;
+        minCostfrom[v] = cost[v][s0];
     }
 
     while (nbVisited < nbVertices) {
-        // get vertex with minimum cost
         int minCost = INT_MAX;
-        int sMinCost;
+        int sMinCost = -1;
         for (int i = 1; i < nbVertices; i++) {
-            if (minCostfrom[vertices[i]] < minCost) {
-                minCost = minCostfrom[vertices[i]];
-                sMinCost = vertices[i];
+            int v = vertices[i];
+            if (!isVisited[v] && minCostfrom[v] < minCost) {
+                minCost = minCostfrom[v];
+                sMinCost = v;
             }
         }
 
         isVisited[sMinCost] = true;
         nbVisited++;
 
-        for(int i = 1; i < nbVertices; i++) {
-            if (isVisited[vertices[i]] == false &
-                cost[sMinCost][vertices[i]] < minCostfrom[vertices[i]]
-            ) {
-                predecesor[vertices[i]] = sMinCost;
-                minCostfrom[vertices[i]] = cost[sMinCost][vertices[i]];
+        for (int i = 1; i < nbVertices; i++) {
+            int v = vertices[i];
+            if (!isVisited[v] && cost[sMinCost][v] < minCostfrom[v]) {
+                predecesor[v] = sMinCost;
+                minCostfrom[v] = cost[sMinCost][v];
             }
         }
     }
 
-    // compute sum of costs (sum of all the predecesor arborescence's costs)
     int sum = 0;
+
     for (int i = 1; i < nbVertices; i++) {
-        sum += cost[predecesor[vertices[i]]][vertices[i]];
+        sum += minCostfrom[vertices[i]];
     }
 
-    // clean up
     free(isVisited);
     free(minCostfrom);
     free(predecesor);
@@ -483,13 +487,12 @@ int bound(
 Cette amélioration permet de continuer à augmenter la taille de `n` calculable "rapidement".
 
 ```shell
-$ for i in 4 22 24 26 28 30; do ./bin/main $i; done
-n=4, bestCost=31319, nbCalls=8, time=0.000s
-n=22, bestCost=85149, nbCalls=487196, time=0.136s
-n=24, bestCost=91278, nbCalls=3295095, time=0.892s
-n=26, bestCost=90943, nbCalls=11584310, time=3.424s
-n=28, bestCost=93669, nbCalls=29870273, time=10.189s
-n=30, bestCost=95952, nbCalls=158631849, time=57.491s
+$ for i in 22 24 26 28 30; do ./bin/main $i; done
+n = 22; bestCost = 82,447; nbCalls = 325,750; time = 0.212s
+n = 24; bestCost = 83,193; nbCalls = 2,215,815; time = 1.494s
+n = 26; bestCost = 85,449; nbCalls = 7,950,442; time = 5.589s
+n = 28; bestCost = 87,005; nbCalls = 20,148,019; time = 15.662s
+n = 30; bestCost = 89,288; nbCalls = 111,920,536; time = 88.576s
 ```
 
 ### Note sur la non-utilisation d'une file de priorité.
@@ -502,7 +505,7 @@ Malheureusement, comme le graphe qui nous intéresse est complet, c'est-à-dire 
 
 ## Partie 7 : Ajout d'une heuristique d'ordre
 
-On peut encore améliorer nos résultats simplement, en guidant la récusion dans `permut` pour que soient explorés en premier les plus courts circuits. En effet, cela permettra alors d'élaguer les chemins moins intéressants encore plus rapidement, et donc d'accélérer le processus de recherche.
+On peut encore améliorer nos résultats simplement, en guidant la récusion dans `permut` pour que soient explorés en premier les plus courts circuits. En effet, cela permettra alors d'élaguer les chemins moins intéressants encore plus rapidement, et donc d'accélérer le processus de recherche (puisque de meilleures bornes supérieures seront trouvées plus vite).
 
 Pour cela, on dispose d'une *heuristique d'ordre* simple: Visiter d'abord les sommets les plus proches du dernier sommet visité.
 
@@ -529,7 +532,7 @@ void permutLoop(
         // constraint: no crossing edges
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
-    
+  
         // constraint: bound
         int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
         int boundedCost = nextCost + bound(
@@ -556,7 +559,7 @@ void permutLoop(
             notVisited, nbNotVisited-1,
             cost  
         );
-    
+  
         // backtrack
         notVisited[nbNotVisited-1] = notVisited[i];
         notVisited[i] = tmp;
