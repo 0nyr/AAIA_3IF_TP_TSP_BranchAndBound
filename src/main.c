@@ -190,7 +190,7 @@ int simple_bound(
     int** cost
 ) {
     if (nbNotVisited == 0) {
-        return 0;
+        return cost[lastVisited][0];
     }
 
     int sum = 0;
@@ -238,7 +238,7 @@ int bound(
     int** cost
 ) {
     if (nbNotVisited == 0) {
-        return 0;
+        return cost[lastVisited][0];
     }
 
     int sum = 0;
@@ -299,9 +299,7 @@ void permutLoop(
         // remove notVisited[i] from notVisited
         // we need to swap notVisited[i] with notVisited[nbNotVisited-1] for 
         // easy restoration of the array after the recursive call
-        int tmp = notVisited[i];
-        notVisited[i] = notVisited[nbNotVisited-1];
-        notVisited[nbNotVisited-1] = tmp;
+        swap(&notVisited[i], &notVisited[nbNotVisited - 1]);
 
         // constraint: bound
         int boundedCost = costVisitedWithCurrent + bound(
@@ -322,10 +320,12 @@ void permutLoop(
         }
         
         // backtrack
-        notVisited[nbNotVisited-1] = notVisited[i];
-        notVisited[i] = tmp;
+        swap(&notVisited[i], &notVisited[nbNotVisited - 1]);
     }
 }
+
+int comp(const int *a, const int *b, const int *hs) { return hs[*a] - hs[*b]; }
+
 
 void permut(
     int visited[], int nbVisited, int costVisited,
@@ -379,12 +379,23 @@ void permut(
         notVisitedIncrOrder[i] = notVisited[i];
     }
 
+    #ifndef VARIANT_QSORT_R
     quicksortInPlace(
         notVisitedIncrOrder, 
         0, // index of first element
         nbNotVisited - 1, // WARN: index of last element, not number of elements
         costsFromLastVisited
     );
+    #else
+    // NOTE: variant with with qsort_r from GLIBC
+    qsort_r(
+        notVisitedIncrOrder, 
+        nbNotVisited, 
+        sizeof(int),
+        comp,
+        cost[visited[nbVisited-1]]
+    );
+    #endif
 
     // recursive call, with reordered notVisited array
     permutLoop(

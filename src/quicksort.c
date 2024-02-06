@@ -3,6 +3,7 @@
 
 /**
  * @brief Swaps the values of two integers.
+ * WARN: Needs to pass the pointers to the integers.
  * 
  * @param a Pointer to the first integer
  * @param b Pointer to the second integer

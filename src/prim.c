@@ -24,19 +24,16 @@ int costPrimMST(
 ) {
     bool* isVisited = (bool*) malloc(nbAllVertices * sizeof(bool));
     int* minCostfrom = (int*) malloc(nbAllVertices * sizeof(int));
-    int* predecesor = (int*) malloc(nbAllVertices * sizeof(int));
 
     // Assuming vertices[0] is the starting vertex
     int s0 = vertices[0];
     isVisited[s0] = true;
-    predecesor[s0] = -1;
     minCostfrom[s0] = 0;
     int nbVisited = 1;
 
     for (int i = 1; i < nbVertices; i++) {
         int v = vertices[i];
         isVisited[v] = false;
-        predecesor[v] = s0;
         minCostfrom[v] = cost[v][s0];
     }
 
@@ -57,7 +54,6 @@ int costPrimMST(
         for (int i = 1; i < nbVertices; i++) {
             int v = vertices[i];
             if (!isVisited[v] && cost[sMinCost][v] < minCostfrom[v]) {
-                predecesor[v] = sMinCost;
                 minCostfrom[v] = cost[sMinCost][v];
             }
         }
@@ -75,7 +71,6 @@ int costPrimMST(
 
     free(isVisited);
     free(minCostfrom);
-    free(predecesor);
 
     return sum;
 }
