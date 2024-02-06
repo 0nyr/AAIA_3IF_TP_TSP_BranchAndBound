@@ -157,3 +157,439 @@ Cette modification simple permet de maintenir à jour la valeur du meilleur coû
 \end{lstlisting}
 
 \section{Partie 4: Propagation de contraintes}
+
+Propriété: étant donné un circuit hamiltonien $C = \langle v_0, v_1, \ldots, v_{n-1}, v_n \rangle$ avec $v_n = v_0$, s'il existe deux indices $i$ et $j$ (avec $0 \leq i < j \leq n$) tels que les arcs $(v_i, v_{i+1})$ et $(v_j, v_{j+1})$ se croisent, alors le circuit obtenu en échangeant ces arcs avec les arcs $(v_i, v_j)$ et $(v_{i+1}, v_{j+1})$ est de longueur inférieure à celle de $C$.
+
+\textit{Montrez qu'une conséquence de cette propriété est que la solution optimale ne peut pas contenir deux arêtes qui se croisent.}
+
+Montrez qu'une conséquence de cette propriété est que la solution optimale ne peut pas contenir deux arêtes qui se croisent.
+
+\textbf{Preuve par l'absurde.}
+
+On suppose $C_{\text{opti}}$, chemin hamiltonien optimal de longueur la plus faible. On suppose également qu'il existe deux indices $i$ et $j$ (avec $0 \leq i < j \leq n$) tels que les arcs $(v_i, v_{i+1})$ et $(v_j , v_{j+1})$ se croisent, ces arcs étant des arcs de $C_{\text{opti}}$.
+
+On transforme $C_{\text{opti}}$ en $C_{\text{opti}}'$ tel que $C_{\text{opti}}'$ est un chemin hamiltonien avec les mêmes arcs que $C_{\text{opti}}$ à l'exception des arcs $(v_i, v_{i+1})$ et $(v_j , v_{j+1})$, remplacés par les arcs $(v_i, v_j)$ et $(v_{i+1}, v_{j+1})$.
+
+D'après la propriété (sur les chemins Hamiltoniens avec croisements), $\text{Longueur}(C_{\text{opti}}') \leq \text{Longueur}(C_{\text{opti}})$. Contradiction, puisqu'une $C_{\text{opti}}$ est par définition optimal, il ne devrait pas y avoir de chemin plus court!
+
+On déduit que la solution optimale $C_{\text{opti}}$ ne peut pas contenir deux arêtes qui se croisent.
+
+\textbf{Nouvelle modification du code pour éliminer ces cas de la recherche.}
+
+Soit $i$ un entier tel que $i$ appartient à $\{0, \ldots, k - 1\}$, avec $k$ le nombre de sommets visités dans le chemin à l'étape $k$. À l'étape $k$, on cherche à ajouter un $k+1^{\text{ème}}$ sommet.
+
+Pour vérifier que l'on n'ajoute pas d'arc qui croise les arcs déjà présents dans le chemin à une étape donnée, on vérifie que la longueur additionnée $\text{Longueur}(V_i \rightarrow V_{i+1}) + \text{Longueur}(V_k \rightarrow V_{k+1}) \leq \text{Longueur}(V_i \rightarrow V_k) + \text{Longueur}(V_{i+1} \rightarrow V_{k+1})$.
+
+On modifie ainsi le code de la fonction \texttt{permut}. Dans la boucle \texttt{for}, on ajoute :
+
+\begin{lstlisting}[language=C, caption={Contrainte : pas d'arcs croisés.}]
+    // constraint: no crossing edges
+    if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+        continue;
+\end{lstlisting}
+
+On définit ensuite la fonction \texttt{hasCrossingEdges} qui détecte si le nœud que l'on cherche à ajouter va créer un croisement d'arc.
+
+\begin{lstlisting}[language=C, caption={Détection des arcs croisés.}]
+    bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
+        if (nbVisited <= 3) {
+            return false; // no crossing edges with 3 vertices or less
+        }
+        // Longueur(Vk -> Vk+1)
+        int costLastToNewVectex = cost[newVertex][visited[nbVisited-1]];
+        for (int i = 0; i < (nbVisited-2); i++) {
+            // Longueur(Vi -> Vi+1)
+            int costItoIPlus1 = cost[visited[i]][visited[i+1]];
+            // Longueur(Vi -> Vk)
+            int costItoLast = cost[visited[i]][visited[nbVisited-1]];
+            // Longueur(Vi+1 -> Vk+1)
+            int costIPlus1toNewVertex = cost[newVertex][visited[i+1]];
+            if (
+                (costItoLast +  costIPlus1toNewVertex)
+                < (costItoIPlus1 + costLastToNewVectex)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+\end{lstlisting}
+
+On peut alors effectuer des calculs sur des valeurs de $n$ plus élevées :
+
+\begin{lstlisting}[language=bash, caption={Exécution de l'algorithme \texttt{permut} pour différentes valeurs de $n$.}]
+$ for i in 14 16 18 20 22 24; do ./bin/main $i; done
+n = 14; bestCost = 69,382; nbCalls = 97,343; time = 0.009s
+n = 16; bestCost = 70,310; nbCalls = 596,119; time = 0.043s
+n = 18; bestCost = 75,456; nbCalls = 3,767,726; time = 0.312s
+n = 20; bestCost = 81,292; nbCalls = 19,821,721; time = 1.861s
+n = 22; bestCost = 82,447; nbCalls = 107,963,329; time = 11.575s
+n = 24; bestCost = 83,193; nbCalls = 638,366,435; time = 78.131s
+\end{lstlisting}
+
+\section{Partie 5: Implémentation de \texttt{bound} simple}
+
+On implémente la fonction \texttt{bound}. Cette fonction d'évaluation calcule une borne inférieure de la longueur du plus court chemin allant du dernier sommet visité jusqu'à 0 en passant par chaque sommet non visité exactement une fois.
+
+\begin{lstlisting}[language=C, caption={Fonction d'évaluation (borne) pour calculer une borne inférieure du coût.}]
+/**
+ * @brief Evaluation function (bound), that returns
+ * a lower bound of the cost of a path from the last
+ * visited vertex to the end of the tour (vertex 0),
+ * passing by all the remaining unvisited vertices.
+ * 
+ * This is the first version of the bound function,
+ * as described in part 5 of the subject.
+ */
+int simple_bound(
+    int lastVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    int sum = 0;
+    // get l, length of the smallest edge from the last 
+    // visited vertex to one of the remaining unvisited 
+    // vertices
+    int l = INT_MAX;
+    for (int i = 0; i < nbNotVisited; i++) {
+        l = min(l, cost[lastVisited][notVisited[i]]);
+    }
+    sum += l;
+
+    // Now, for every remaining unvisited vertex, we determine
+    // l' the length of the smallest edge from this vertex to
+    // one of the remaining unvisited vertices, or to the end
+    // of the tour (vertex 0).
+    // WARN: Don't include the current vertex itself.
+    for (int i = 0; i < nbNotVisited; i++) {
+        int lPrime = INT_MAX;
+        for (int j = 0; j < nbNotVisited; j++) {
+            if (j != i) { // don't include the current vertex
+                lPrime = min(lPrime, cost[notVisited[i]][notVisited[j]]);
+            }
+        }
+        // vertex 0
+        if (cost[notVisited[i]][0] < lPrime) {
+            lPrime = cost[notVisited[i]][0];
+        }
+        sum += lPrime;
+    }
+
+    return sum;
+}
+\end{lstlisting}
+
+On peut alors intégrer cette fonction afin de limiter le nombre de récursions dans \texttt{permut}. Mais d'abord, il nous faut un moyen de conserver la longueur du parcours en cours. On pourrait recalculer cette valeur à chaque fois, mais ça serait peu efficace. On préférera la passer comme un paramètre. On modifie la fonction \texttt{permut} avec un nouveau paramètre \texttt{int costVisited}. Au premier appel de \texttt{permut}, cette valeur sera de 0 puisqu'aucun sommet n'a été visité.
+
+On peut alors ajouter, dans la boucle \texttt{for} et après la vérification de non-croisement, le code suivant :
+
+\begin{lstlisting}[language=C, caption={Intégration de la contrainte de borne dans \texttt{permut}.}]
+// constraint: bound
+int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
+int boundedCost = nextCost + bound(
+    visited, nbVisited, 
+    notVisited, nbNotVisited,
+    cost
+);
+if (boundedCost < bestCost) {
+    // recursive call
+    permut(
+        visited, nbVisited+1, costVisitedWithCurrent,
+        notVisited, nbNotVisited-1,
+        cost  
+    );
+}
+\end{lstlisting}
+
+Cette amélioration nous permet de faire des calculs avec des valeurs de \(n\) toujours plus grandes :
+
+\begin{lstlisting}[language=bash, caption={Résultats d'exécution de l'algorithme \texttt{permut} pour différentes valeurs de \(n\).}]
+$ for i in 4 20 22 24 26 28; do ./bin/main $i; done
+n = 20; bestCost = 81,292; nbCalls = 429,737; time = 0.176s
+n = 22; bestCost = 82,447; nbCalls = 2,003,996; time = 1.014s
+n = 24; bestCost = 83,193; nbCalls = 10,759,285; time = 5.836s
+n = 26; bestCost = 85,449; nbCalls = 20,492,536; time = 12.516s
+n = 28; bestCost = 87,005; nbCalls = 65,891,592; time = 49.869s
+\end{lstlisting}
+
+\section{Partie 6: Amélioration de la borne}
+
+On peut améliorer la fonction \texttt{bound} précédente en calculant une meilleure approximation de la borne inférieure. Pour cela, on se base sur un calcul d'arbre couvrant minimal (\acrfull{mst}). Dans l'idée, il s'agit vraiment de faire le même calcul que dans la partie précédente, l'amélioration ici se situe au niveau du fait que, plutôt que de calculer une limite incluant le sommet 0 de fin pour chaque sommet non visité, ici, on aura un meilleur encadrement puisqu'un seul sommet pourra être connecté à l'arrivée 0, au lieu de potentiellement tous avant.
+
+Voici l'implémentation de l'algorithme de Prim, pour notre situation. On note que l'on n'a pas besoin de maintenir l'ensemble $E$ des arcs de l'arbre couvrant minimum, puisqu'on ne s'intéresse qu'à la longueur de l'arborescence (\acrshort{mst}) construite par l'algorithme. On notera aussi qu'on n'a pas besoin de passer la structure du graphe de base, puisque celui-ci est complet. Il faut néanmoins passer en paramètre de la fonction le nombre de nœuds du graphe de base malgré qu'on soit en train de calculer le \acrshort{mst} du sous-graphe des nœuds non visités, afin de pouvoir initialiser la taille des tableaux correctement.
+
+\begin{lstlisting}[language=C, caption={Implémentation de l'algorithme de Prim pour calculer le coût du \acrshort{mst}.}]
+/**
+ * @brief Returns the cost of the Minimum Spanning Tree (MST) of given vertices.
+ * 
+ * NOTE: Because the base graph is complete, no need to pass a 
+ * structure other than the number of vertices and the cost matrix.
+ */
+int costPrimMST(
+    int vertices[], // subset of vertices
+    int nbVertices, // number of vertices in the subset
+    int nbAllVertices, // Number of vertices in the base graph
+    int** cost // cost matrix of the base graph
+) {
+    bool* isVisited = (bool*) malloc(nbAllVertices * sizeof(bool));
+    int* minCostfrom = (int*) malloc(nbAllVertices * sizeof(int));
+    int* predecesor = (int*) malloc(nbAllVertices * sizeof(int));
+
+    // Assuming vertices[0] is the starting vertex
+    int s0 = vertices[0];
+    isVisited[s0] = true;
+    predecesor[s0] = -1;
+    minCostfrom[s0] = 0;
+    int nbVisited = 1;
+
+    for (int i = 1; i < nbVertices; i++) {
+        int v = vertices[i];
+        isVisited[v] = false;
+        predecesor[v] = s0;
+        minCostfrom[v] = cost[v][s0];
+    }
+
+    while (nbVisited < nbVertices) {
+        int minCost = INT_MAX;
+        int sMinCost = -1;
+        for (int i = 1; i < nbVertices; i++) {
+            int v = vertices[i];
+            if (!isVisited[v] && minCostfrom[v] < minCost) {
+                minCost = minCostfrom[v];
+                sMinCost = v;
+            }
+        }
+
+        isVisited[sMinCost] = true;
+        nbVisited++;
+
+        for (int i = 1; i < nbVertices; i++) {
+            int v = vertices[i];
+            if (!isVisited[v] && cost[sMinCost][v] < minCostfrom[v]) {
+                predecesor[v] = sMinCost;
+                minCostfrom[v] = cost[sMinCost][v];
+            }
+        }
+    }
+
+    int sum = 0;
+
+    for (int i = 1; i < nbVertices; i++) {
+        sum += minCostfrom[vertices[i]];
+    }
+
+    free(isVisited);
+    free(minCostfrom);
+    free(predecesor);
+
+    return sum;
+}
+\end{lstlisting}
+
+Il ne reste plus qu'à intégrer cette nouvelle fonction dans la fonction \texttt{bound} :
+
+\begin{lstlisting}[language=C, caption={Intégration de l'algorithme de Prim dans la fonction \texttt{bound}.}]
+int bound(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    int sum = 0;
+    int lFromLast, lToZero = INT_MAX;
+    for (int i; i < nbNotVisited; i++) {
+        if (cost[visited[nbVisited-1]][notVisited[i]] < lFromLast) {
+            lFromLast = cost[visited[nbVisited-1]][notVisited[i]];
+        }
+        if (cost[notVisited[i]][0] < lToZero) {
+            lToZero = cost[notVisited[i]][0];
+        }
+    }
+    sum += lFromLast + lToZero;
+
+    sum += costPrimMST(
+        nbNotVisited + nbVisited, 
+        notVisited, nbNotVisited, cost
+    );
+
+    return sum;
+}
+\end{lstlisting}
+
+Cette amélioration permet de continuer à augmenter la taille de $n$ calculable "rapidement".
+
+\begin{lstlisting}[language=bash, caption={Résultats d'exécution de l'algorithme \texttt{permut} pour différentes valeurs de $n$.}]
+$ for i in 22 24 26 28 30; do ./bin/main $i; done
+n = 22; bestCost = 82,447; nbCalls = 325,750; time = 0.212s
+n = 24; bestCost = 83,193; nbCalls = 2,215,815; time = 1.494s
+n = 26; bestCost = 85,449; nbCalls = 7,950,442; time = 5.589s
+n = 28; bestCost = 87,005; nbCalls = 20,148,019; time = 15.662s
+n = 30; bestCost = 89,288; nbCalls = 111,920,536; time = 88.576s
+\end{lstlisting}
+
+\textbf{Note sur la non-utilisation d'une file de priorité.}
+
+Considérons l'algorithme d'un point de vue théorique. D'après le cours de Christine Solnon :
+
+Soient $n$ le nombre de sommets et $p$ le nombre d'arêtes du graphe sur lequel on veut calculer le \acrshort{mst}. L'algorithme passe $n - 1$ fois dans la boucle \texttt{while}. À chaque passage, il faut chercher le sommet de l'ensemble des sommets pas encore visité ayant la plus petite valeur du tableau $c$ (\texttt{minCostfrom} dans mon implémentation) puis parcourir toutes les arêtes adjacentes à ce sommet. Si ces sommets non visités sont mémorisés dans un tableau ou une liste, la complexité est $O(n^2)$. Si on utilise une file de priorité (implémentation en tas binaire), alors la complexité est $O(p \log n)$. En effet, si l'accès se fait en temps constant, il faut aussi compter la mise à jour du tas binaire à chaque fois que l'on modifie le tableau $c$. Comme il y a au plus $p$ mises à jour de $c$ (une par arête), la complexité de l'algorithme Prim dans ce cas est bien $O(p \log n)$.
+
+Malheureusement, comme le graphe qui nous intéresse est complet, c'est-à-dire que chaque sommet est connecté à tous les autres sommets, alors on a $p = n(n - 1)/2$. Dans ce cas, on aurait $O(n^2 \log n)$ qui est pire que $O(n^2)$. D'où le fait que l'on n'utilisera pas de file de priorité ici.
+
+\section{Partie 7: Ajout d'une heuristique d'ordre}
+
+On peut encore améliorer nos résultats simplement, en guidant la récursion dans \texttt{permut} pour que soient explorés en premier les plus courts circuits. En effet, cela permettra alors d'élaguer les chemins moins intéressants encore plus rapidement, et donc d'accélérer le processus de recherche (puisque de meilleures bornes supérieures seront trouvées plus vite).
+
+Pour cela, on dispose d'une \textit{heuristique d'ordre} simple : Visiter d'abord les sommets les plus proches du dernier sommet visité.
+
+On modifie en conséquence la fonction \texttt{permut}. On commence par sortir la boucle \texttt{for} dans une sous-fonction \texttt{permutLoop}. Cela sera utile pour compartimenter le code, et surtout éviter de renommer le tableau \texttt{notVisited} que l'on va devoir réordonner à chaque passage dans \texttt{permut}.
+
+\begin{lstlisting}[language=C, caption={Boucle de permutation dans la fonction récursive \texttt{permut}.}]
+/**
+ * @brief Loop inside the recursive function that computes all 
+ * the permutations of the vertices of the graph.
+ * 
+ * @param visited Array of visited vertices
+ * @param nbVisited Number of visited vertices
+ * @param costVisited Cost of the visited vertices
+ * @param notVisited Array of unvisited vertices
+ * @param nbNotVisited Number of unvisited vertices
+ * @param cost Cost matrix
+ */
+void permutLoop(
+    int visited[], int nbVisited, int costVisited,
+    int notVisited[], int nbNotVisited,
+    int** cost
+) {
+    for (int i = 0; i < nbNotVisited; i++) {
+        // constraint: no crossing edges
+        if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+            continue;
+  
+        // constraint: bound
+        int nextCost = costVisited + cost[visited[nbVisited-1]][notVisited[i]];
+        int boundedCost = nextCost + bound(
+            visited, nbVisited, 
+            notVisited, nbNotVisited,
+            cost
+        );
+        if (boundedCost > bestCost)
+            continue;
+
+        // add notVisited[i] to visited
+        visited[nbVisited] = notVisited[i];
+
+        // remove notVisited[i] from notVisited
+        int tmp = notVisited[i];
+        notVisited[i] = notVisited[nbNotVisited-1];
+        notVisited[nbNotVisited-1] = tmp;
+
+        // recursive call
+        permut(
+            visited, nbVisited+1, nextCost,
+            notVisited, nbNotVisited-1,
+            cost  
+        );
+  
+        // backtrack
+        notVisited[nbNotVisited-1] = notVisited[i];
+        notVisited[i] = tmp;
+    }
+}
+\end{lstlisting}
+
+À noter que cette fonction utilise \texttt{permut} dans son corps. Hors, cette fonction n'est pas encore définie. On doit donc ajouter un fichier \textit{header} pour définir nos fonctions et permettre la compilation sans erreurs. Le fichier \texttt{main.c} :
+
+\begin{lstlisting}[language=C, caption={Définitions des fonctions dans le fichier header \texttt{main.h}.}]
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <stdbool.h>
+
+// Function declarations
+int nextRand(int n);
+int** createCost(int n);
+void genPythonTurtleTour(int visited[], int n);
+bool hasCrossingEdges(
+    int visited[], 
+    int nbVisited, 
+    int newVertex, 
+    int** cost
+);
+int costPrimMST(
+    int baseGraphNbVertices,
+    int vertices[], 
+    int nbVertices, 
+    int** cost
+);
+int bound(
+    int visited[], int nbVisited, 
+    int notVisited[], int nbNotVisited,
+    int** cost
+);
+void permutLoop(
+    int visited[], int nbVisited, int costVisited,
+    int notVisited[], int nbNotVisited,
+    int** cost
+);
+void permut(
+    int visited[], int nbVisited, int costVisited,
+    int notVisited[], int nbNotVisited,
+    int** cost
+);
+void printCostMatrix(int** cost, int n);
+
+#endif
+\end{lstlisting}
+
+Dans ce fichier, seule la définition de \texttt{permut} et \texttt{permutLoop} est réellement importante.
+
+À l'emplacement où se trouvait le corps de \texttt{permutLoop} dans \texttt{permut}, on ajoute le code suivant pour réordonner le tableau \texttt{notVisited} :
+
+\begin{lstlisting}[language=C, caption={Réordonnancement du tableau \texttt{notVisited} dans \texttt{permut}.}]
+// reordering notVisited array (a copy of it)
+// wrt cost of edge from last visited vertex
+
+int* costsFromLastVisited = (int*) malloc(nbNotVisited * sizeof(int));
+for (int i = 0; i < nbNotVisited; i++) {
+    costsFromLastVisited[i] = cost[visited[nbVisited-1]][notVisited[i]];
+}
+int* notVisitedIncrOrder = (int*) malloc(nbNotVisited * sizeof(int));
+for (int i = 0; i < nbNotVisited; i++) {
+    notVisitedIncrOrder[i] = notVisited[i];
+}
+
+quicksortInPlace(
+    notVisitedIncrOrder, 
+    0, // index of first element
+    nbNotVisited - 1, // index of last element
+    costsFromLastVisited
+);
+
+// recursive call, with reordered notVisited array
+permutLoop(
+    visited, nbVisited, costVisited,
+    notVisitedIncrOrder, nbNotVisited,
+    cost
+);
+
+// clean up
+free(costsFromLastVisited);
+free(notVisitedIncrOrder);
+\end{lstlisting}
+
+Ceci permet de trier le tableau de sommets \texttt{notVisited} en un tableau trié dans l'ordre croissant des coûts de chaque arc depuis le dernier sommet visité jusqu'à chacun des sommets du tableau. Pour effectuer le tri, on dispose de pas mal de possibilités. J'ai ici choisi l'algorithme \texttt{quicksort} parce qu'il est plutôt efficace, élégant et simple à implémenter. Néanmoins, d'autres algorithmes plus performants existent.
+
+On obtient les résultats suivants :
+
+\begin{lstlisting}[language=bash, caption={Résultats d'exécution de l'algorithme \texttt{permut} avec l'heuristique d'ordre.}]
+$ for i in 28 30 32 34 36 38 40; do ./bin/main $i; done
+n = 28; bestCost = 87,005; nbCalls = 5,268; time = 0.091s
+n = 30; bestCost = 89,288; nbCalls = 18,228; time = 0.205s
+n = 32; bestCost = 95,293; nbCalls = 58,312; time = 0.938s
+n = 34; bestCost = 96,116; nbCalls = 59,572; time = 1.143s
+n = 36; bestCost = 97,027; nbCalls = 95,642; time = 1.987s
+n = 38; bestCost = 102,757; nbCalls = 494,645; time = 11.930s
+n = 40; bestCost = 106,431; nbCalls = 1,394,961; time = 36.306s
+\end{lstlisting}
+
+On observe que le mur de temps de calculs est maintenant atteint pour $n=40$, ce qui est une amélioration significative.
+

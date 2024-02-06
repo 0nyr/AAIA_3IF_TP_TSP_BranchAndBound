@@ -1,5 +1,7 @@
 # AAIA
 
+![Branch & Bound illustration](./img/front_image_branch_and_bound.jpg)
+
 > This project is configured for Linux, NixOS
 
 Le problème du voyageur de commerce, ou Travelling Salesman Problem (TSP) en anglais, est un problème classique en recherche opérationnelle et en informatique théorique. Il consiste à trouver le plus court chemin permettant de visiter chaque ville (ou noeud du graphe) une et une seule fois et de retourner à la ville de départ (ou noeud de départ). Le TSP est connu pour être NP-difficile, ce qui signifie qu'il n'existe pas, à l'heure actuelle, d'algorithme permettant de résoudre tous les cas de TSP de manière rapide (en temps polynomial).
