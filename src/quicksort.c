@@ -20,22 +20,22 @@ void swap(int *a, int *b) {
  * @param arrayOfElements Array of elements
  * @param low Index of the first element
  * @param high Index of the last element
- * @param cost Array of costs
+ * @param weights Array of weights, associated with the elements of arrayOfElements, and used for comparison.
  * @return int Index of the pivot
 */
-int partition(int arrayOfElements[], int low, int high, int cost[]) {
-    int pivot = cost[high];
+int partition(int arrayOfElements[], int low, int high, int weights[]) {
+    int pivot = weights[high];
     int i = (low - 1);
 
     for (int j = low; j <= high - 1; j++) {
-        if (cost[j] < pivot) {
+        if (weights[j] < pivot) {
             i++;
             swap(&arrayOfElements[i], &arrayOfElements[j]);
-            swap(&cost[i], &cost[j]);  // Keep the cost array in sync with the swaps
+            swap(&weights[i], &weights[j]);  // Keep the cost array in sync with the swaps
         }
     }
     swap(&arrayOfElements[i + 1], &arrayOfElements[high]);
-    swap(&cost[i + 1], &cost[high]);  // Keep the cost array in sync with the swaps
+    swap(&weights[i + 1], &weights[high]);  // Keep the cost array in sync with the swaps
     return (i + 1);
 }
 
