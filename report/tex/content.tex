@@ -180,38 +180,32 @@ Soit $i$ un entier tel que $i$ appartient à $\{0, \ldots, k - 1\}$, avec $k$ le
 
 Pour vérifier que l'on n'ajoute pas d'arc qui croise les arcs déjà présents dans le chemin à une étape donnée, on vérifie que la longueur additionnée $\text{Longueur}(V_i \rightarrow V_{i+1}) + \text{Longueur}(V_k \rightarrow V_{k+1}) \leq \text{Longueur}(V_i \rightarrow V_k) + \text{Longueur}(V_{i+1} \rightarrow V_{k+1})$.
 
-On modifie ainsi le code de la fonction \texttt{permut}. Dans la boucle \texttt{for}, on ajoute :
+On modifie ainsi le code de la fonction \texttt{permut}. Dans la boucle \texttt{for}, on ajoute le code suivant :
 
 \begin{lstlisting}[language=C, caption={Contrainte : pas d'arcs croisés.}]
     // constraint: no crossing edges
-    if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+    int croise = 0; // 0 == false, 1 == true
+    for (int j = 0; j < nbVisited - 1; j++) {
+        if(
+            cost[visited[j]][visited[nbVisited - 1]] + cost[visited[j + 1]][notVisited[i]] 
+            < cost[visited[j]][visited[j + 1]] + cost[visited[nbVisited - 1]][notVisited[i]]
+        ){
+            croise = 1;
+            break; //Si notre nouvelle arrete en croise une autre on arrete
+        }
+    }
+    if(croise == 1){
         continue;
+    }
 \end{lstlisting}
 
-On définit ensuite la fonction \texttt{hasCrossingEdges} qui détecte si le nœud que l'on cherche à ajouter va créer un croisement d'arc.
+On pour une meilleur lisibilité du code, je conseille de définir une fonction \texttt{hasCrossingEdges} qui détecte si le nœud que l'on cherche à ajouter va créer un croisement d'arc.
 
-\begin{lstlisting}[language=C, caption={Détection des arcs croisés.}]
-    bool hasCrossingEdges(int visited[], int nbVisited, int newVertex, int** cost) {
-        if (nbVisited <= 3) {
-            return false; // no crossing edges with 3 vertices or less
-        }
-        // Longueur(Vk -> Vk+1)
-        int costLastToNewVectex = cost[newVertex][visited[nbVisited-1]];
-        for (int i = 0; i < (nbVisited-2); i++) {
-            // Longueur(Vi -> Vi+1)
-            int costItoIPlus1 = cost[visited[i]][visited[i+1]];
-            // Longueur(Vi -> Vk)
-            int costItoLast = cost[visited[i]][visited[nbVisited-1]];
-            // Longueur(Vi+1 -> Vk+1)
-            int costIPlus1toNewVertex = cost[newVertex][visited[i+1]];
-            if (
-                (costItoLast +  costIPlus1toNewVertex)
-                < (costItoIPlus1 + costLastToNewVectex)
-            ) {
-                return true;
-            }
-        }
-        return false;
+\begin{lstlisting}[language=C, caption={Remplacement par une fonction pour plus de lisibilité.}]
+    // constraint: no crossing edges
+    if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
+    {
+        continue;
     }
 \end{lstlisting}
 

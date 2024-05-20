@@ -6,6 +6,10 @@
 
 ## Logs
 
+### Mon 20 May 2024
+
+Correction on the edge crossing detection in the `correction.md` and the report.
+
 ### Sat 6 Jan 2024
 
 Continue working on this project.

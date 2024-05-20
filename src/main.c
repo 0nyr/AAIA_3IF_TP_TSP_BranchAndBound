@@ -286,6 +286,21 @@ void permutLoop(
     for (int i = 0; i < nbNotVisited; i++) {
         // constraint: no crossing edges
         // WARN: To be done FIRST, before adding notVisited[i] to visited
+        
+        // int croise = 0; // 0 == false, 1 == true
+        // for (int j = 0; j < nbVisited - 1; j++) {
+        //     if(
+        //         cost[visited[j]][visited[nbVisited - 1]] + cost[visited[j + 1]][notVisited[i]] 
+        //         < cost[visited[j]][visited[j + 1]] + cost[visited[nbVisited - 1]][notVisited[i]]
+        //     ){
+        //         croise = 1;
+        //         break; //Si notre nouvelle arrete en croise une autre on arrete
+        //     }
+        // }
+        // if(croise == 1){
+        //     continue;
+        // }
+
         if (hasCrossingEdges(visited, nbVisited, notVisited[i], cost))
             continue;
 
